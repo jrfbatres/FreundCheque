@@ -14,7 +14,8 @@ export default function CaptureFront() {
   
   const [validations, setValidations] = useState({
     papel: false,
-    iluminacion: false
+    iluminacion: false,
+    bandaMICR: false
   });
 
   const [allValid, setAllValid] = useState(false);
@@ -36,8 +37,10 @@ export default function CaptureFront() {
       
       let centerBrightPixels = 0;
       let edgeDarkPixels = 0;
+      let micrDarkPixels = 0;
       let centerTotal = 0;
       let edgeTotal = 0;
+      let micrTotal = 0;
 
       for (let y = 0; y < height; y += 10) {
         for (let x = 0; x < width; x += 10) {
@@ -49,6 +52,7 @@ export default function CaptureFront() {
           const brightness = (r + g + b) / 3;
           
           const isEdge = x < width * 0.1 || x > width * 0.9 || y < height * 0.1 || y > height * 0.9;
+          const isMicrZone = y > height * 0.70 && y < height * 0.85 && x > width * 0.1 && x < width * 0.9;
           
           if (isEdge) {
             edgeTotal++;
@@ -57,21 +61,28 @@ export default function CaptureFront() {
             centerTotal++;
             if (brightness > 150) centerBrightPixels++;
           }
+
+          if (isMicrZone) {
+            micrTotal++;
+            if (brightness < 100) micrDarkPixels++;
+          }
         }
       }
 
       const centerIsPaper = (centerBrightPixels / centerTotal) > 0.4; 
       const edgeIsDark = (edgeDarkPixels / edgeTotal) > 0.3;
+      const micrDetectado = micrTotal > 0 ? (micrDarkPixels / micrTotal) > 0.04 : false; // Al menos 4% de tinta oscura en la zona MICR
 
       const papelDetectado = centerIsPaper && edgeIsDark;
       const iluminacionOk = (centerBrightPixels / centerTotal) > 0.2; // Al menos un 20% brillante
 
       setValidations({
         papel: papelDetectado,
-        iluminacion: iluminacionOk
+        iluminacion: iluminacionOk,
+        bandaMICR: micrDetectado
       });
 
-      if (papelDetectado && iluminacionOk) {
+      if (papelDetectado && iluminacionOk && micrDetectado) {
         setAllValid(true);
       }
     } catch (error) {
@@ -134,6 +145,13 @@ export default function CaptureFront() {
           <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-emerald-400 -mb-1 -ml-1 rounded-bl-lg transition-all duration-300" />
           <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-emerald-400 -mb-1 -mr-1 rounded-br-lg transition-all duration-300" />
           
+          {/* AR Target MICR */}
+          <div className="absolute bottom-6 left-6 right-6 h-12 border-2 border-dashed border-emerald-400/50 rounded flex items-center justify-center bg-emerald-500/10 pointer-events-none transition-all duration-500">
+            <span className="text-emerald-300/80 text-[10px] font-mono font-bold tracking-widest uppercase">
+              Alinear Banda Inferior MICR Aquí
+            </span>
+          </div>
+
           {/* AR Checklist Simplificado */}
           <div className="absolute top-4 left-4 flex flex-col gap-1.5 text-[10px] sm:text-xs font-mono bg-black/70 p-3 rounded-lg backdrop-blur-md border border-white/10 shadow-xl pointer-events-auto">
             {Object.entries(validations).map(([key, isValid]) => (
