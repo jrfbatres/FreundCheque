@@ -47,8 +47,8 @@ const isValidAmount = (amountStr: string) => {
 
 const isValidBeneficiario = (ben: string) => {
   if (!ben || ben.trim() === '') return false;
-  // Permite combinaciones de FREUND LTDA, FERRETERIAS FREUND LTDA DE CV ignorando puntos
-  const regex = /^(ferreterias?\s+)?freund(,\s*|\s+)ltda\.?(\s+de\s+c\.?v\.?)?$/i;
+  // Permite combinaciones de FREUND LTDA, FERRETERIAS FREUND, FREUND DE EL SALVADOR LTDA DE CV ignorando puntos
+  const regex = /^(ferreterias?\s+)?freund(\s+de\s+el\s+salvador)?(,\s*|\s+)ltda\.?(\s+de\s+c\.?v\.?)?$/i;
   return regex.test(ben.trim());
 };
 
@@ -375,7 +375,7 @@ export default function ReviewCapture() {
 
             {/* Beneficiario */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Beneficiario (FREUND LTDA de C.V.)</label>
+              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Beneficiario (FREUND / FREUND DE EL SALVADOR)</label>
               <div className="flex items-center gap-2">
                 <StatusIcon valid={vBeneficiario} />
                 <input type="text" value={beneficiario} readOnly placeholder="Lectura Automática" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
