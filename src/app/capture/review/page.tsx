@@ -331,7 +331,7 @@ export default function ReviewCapture() {
 
             {/* Toggles booleanos */}
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-700/50">
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => setFirma(!firma)}>
+              <div className="flex items-center gap-2 opacity-80">
                 <StatusIcon valid={vFirma} />
                 <span className="text-sm font-semibold select-none">Contiene Firma</span>
               </div>
