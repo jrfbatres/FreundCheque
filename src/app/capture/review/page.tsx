@@ -63,15 +63,37 @@ export default function ReviewCapture() {
   const [cuenta, setCuenta] = useState('');
   const [emisor, setEmisor] = useState('');
   const [beneficiario, setBeneficiario] = useState('');
+  const [numeroCheque, setNumeroCheque] = useState('');
+  const [lineaMICR, setLineaMICR] = useState('');
+  
   const [firma, setFirma] = useState(false);
   const [sinTachaduras, setSinTachaduras] = useState(true);
   const [montosCoinciden, setMontosCoinciden] = useState(false);
   const [esOriginal, setEsOriginal] = useState(false);
   const [esCheque, setEsCheque] = useState<boolean | null>(null);
+  const [tieneMICR, setTieneMICR] = useState(false);
+
+  const [ubicacion, setUbicacion] = useState<{lat: number, lng: number} | null>(null);
+  const [dispositivo, setDispositivo] = useState('');
+  const [fechaCaptura, setFechaCaptura] = useState('');
   
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [isFinished, setIsFinished] = useState(false);
+
+  // Capture device metadata
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setDispositivo(navigator.userAgent);
+      setFechaCaptura(new Date().toISOString());
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => setUbicacion({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          (err) => console.warn('Geolocation error:', err)
+        );
+      }
+    }
+  }, []);
 
   // Call API to process image
   useEffect(() => {
@@ -107,10 +129,13 @@ export default function ReviewCapture() {
           setCuenta(aiData.cuenta || '');
           setEmisor(aiData.emisor || '');
           setBeneficiario(aiData.beneficiario || '');
+          setNumeroCheque(aiData.numeroCheque || '');
+          setLineaMICR(aiData.lineaMICR || '');
           setFirma(aiData.firma || false);
           setSinTachaduras(!aiData.alteraciones); // Si hay alteraciones, tachaduras es false
           setMontosCoinciden(aiData.montosCoinciden || false);
           setEsOriginal(aiData.esOriginal ?? false);
+          setTieneMICR(aiData.tieneMICR ?? false);
         }
       } catch (err: any) {
         console.error("AI Error:", err);
@@ -140,8 +165,9 @@ export default function ReviewCapture() {
   const vTachaduras = sinTachaduras;
   const vMontosCoinciden = montosCoinciden;
   const vEsOriginal = esOriginal;
+  const vTieneMICR = tieneMICR;
 
-  const allValid = vFecha && vMonto && vMontoLetras && vBanco && vCuenta && vEmisor && vBeneficiario && vFirma && vTachaduras && vMontosCoinciden && vEsOriginal;
+  const allValid = vFecha && vMonto && vMontoLetras && vBanco && vCuenta && vEmisor && vBeneficiario && vFirma && vTachaduras && vMontosCoinciden && vEsOriginal && vTieneMICR;
 
   const StatusIcon = ({ valid }: { valid: boolean }) => (
     valid ? <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" /> : <XCircle className="w-5 h-5 text-red-500 shrink-0" />
@@ -154,10 +180,18 @@ export default function ReviewCapture() {
       montoLetras,
       banco,
       cuenta,
+      numeroCheque,
       emisor,
       beneficiario,
       firma,
       sinTachaduras,
+      tieneMICR,
+      lineaMICR,
+      metadatosAuditoria: {
+        fechaCaptura,
+        dispositivo,
+        ubicacion
+      },
       imagenBase64: frontImageBase64
     };
 
@@ -308,12 +342,23 @@ export default function ReviewCapture() {
               </div>
             </div>
 
-            {/* Cuenta */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Número de Cuenta</label>
-              <div className="flex items-center gap-2">
-                <StatusIcon valid={vCuenta} />
-                <input type="text" value={cuenta} onChange={(e) => setCuenta(e.target.value)} placeholder="N° Cuenta" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+            <div className="grid grid-cols-2 gap-3">
+              {/* Número de Cheque */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold uppercase tracking-wider opacity-70">N° Cheque</label>
+                <div className="flex items-center gap-2">
+                  <StatusIcon valid={numeroCheque.length > 0} />
+                  <input type="text" value={numeroCheque} readOnly placeholder="Lectura Auto" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
+                </div>
+              </div>
+
+              {/* Cuenta */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold uppercase tracking-wider opacity-70">N° Cuenta</label>
+                <div className="flex items-center gap-2">
+                  <StatusIcon valid={vCuenta} />
+                  <input type="text" value={cuenta} onChange={(e) => setCuenta(e.target.value)} placeholder="N° Cuenta" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+                </div>
               </div>
             </div>
 
@@ -360,6 +405,13 @@ export default function ReviewCapture() {
                 <div className="flex items-center gap-2 opacity-80">
                   <StatusIcon valid={vTachaduras} />
                   <span className="text-sm font-semibold select-none">Sin Alteraciones o Manchas</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 opacity-80">
+                  <StatusIcon valid={vTieneMICR} />
+                  <span className="text-sm font-semibold select-none">Banda MICR (E-13B/CMC-7) Válida</span>
                 </div>
               </div>
             </div>
