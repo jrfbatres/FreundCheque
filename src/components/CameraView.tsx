@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 interface CameraViewProps {
   onCapture: (base64: string) => void;
   isCapturing: boolean;
-  onAnalyze?: (imageData: ImageData) => void;
+  onAnalyze?: (canvas: HTMLCanvasElement) => void;
   children?: React.ReactNode;
 }
 
@@ -57,11 +57,11 @@ export default function CameraView({ onCapture, isCapturing, onAnalyze, children
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (ctx) {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          onAnalyze(imageData);
+          // Pass the canvas element for OCR processing
+          onAnalyze(canvas);
         }
       }
-    }, 1000);
+    }, 1500); // Increased interval to 1.5s to prevent overwhelming the CPU
     return () => clearInterval(interval);
   }, [onAnalyze]);
 

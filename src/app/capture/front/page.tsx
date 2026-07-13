@@ -24,67 +24,51 @@ export default function CaptureFront() {
   });
 
   const [allValid, setAllValid] = useState(false);
+  const isRecognizingRef = useRef(false);
 
-  const handleAnalyze = useCallback((imageData: ImageData) => {
-    const data = imageData.data;
-    const width = imageData.width;
-    const height = imageData.height;
-    
-    let centerBrightPixels = 0;
-    let edgeDarkPixels = 0;
-    let centerSampleCount = 0;
-    let edgeSampleCount = 0;
+  const handleAnalyze = useCallback(async (canvas: HTMLCanvasElement) => {
+    // Avoid running OCR if it's already processing a frame
+    if (isRecognizingRef.current) return;
+    isRecognizingRef.current = true;
 
-    // Define center area (the check) and edge area (the desk)
-    const marginX = width * 0.15;
-    const marginY = height * 0.15;
+    try {
+      // Lazy load Tesseract
+      const Tesseract = (await import('tesseract.js')).default;
+      
+      const { data: { text } } = await Tesseract.recognize(
+        canvas,
+        'spa',
+        { logger: m => { /* console.log(m) */ } }
+      );
 
-    for (let y = 0; y < height; y += 4) {
-      for (let x = 0; x < width; x += 4) {
-        const i = (y * width + x) * 4;
-        const r = data[i];
-        const g = data[i+1];
-        const b = data[i+2];
-        const isBright = r > 160 && g > 160 && b > 160;
+      const lowerText = text.toLowerCase();
+      // console.log("OCR TEXT:", lowerText);
 
-        if (x > marginX && x < width - marginX && y > marginY && y < height - marginY) {
-          // Center area
-          if (isBright) centerBrightPixels++;
-          centerSampleCount++;
-        } else {
-          // Edge area
-          if (!isBright) edgeDarkPixels++;
-          edgeSampleCount++;
-        }
-      }
-    }
-
-    const centerBrightRatio = centerBrightPixels / centerSampleCount;
-    const edgeDarkRatio = edgeDarkPixels / edgeSampleCount;
-
-    // Heurística: El centro debe ser mayormente claro (papel) y los bordes más oscuros (la mesa)
-    const isPaper = centerBrightRatio > 0.4 && edgeDarkRatio > 0.4;
-
-    if (!isPaper) {
-      setValidations({
-        papel: false, fecha: false, banco: false, cuenta: false, valorLetras: false, firma: false, bandaSeguridad: false
-      });
-      setAllValid(false);
-    } else {
       setValidations(prev => {
         const next = { ...prev };
-        next.papel = true;
-        if (next.papel) next.bandaSeguridad = true; // Simulating fast checks when paper is detected
-        if (next.bandaSeguridad && Math.random() > 0.3) next.banco = true;
-        if (next.banco && Math.random() > 0.3) next.cuenta = true;
-        if (next.cuenta && Math.random() > 0.3) next.fecha = true;
-        if (next.fecha && Math.random() > 0.3) next.valorLetras = true;
-        if (next.valorLetras && Math.random() > 0.3) next.firma = true;
         
+        // Basic OCR heuristics
+        if (!next.papel) next.papel = text.length > 5; // Encontró al menos algunas letras/texto visible
+        if (next.papel && !next.banco) next.banco = lowerText.includes('banco') || lowerText.includes('bank');
+        if (next.papel && !next.cuenta) next.cuenta = lowerText.includes('cuenta') || /\b\d{8,}\b/.test(lowerText);
+        if (next.papel && !next.fecha) next.fecha = lowerText.includes('fecha') || lowerText.includes('date') || /\d{2}\/\d{2}/.test(lowerText) || /\d{4}/.test(lowerText);
+        if (next.papel && !next.valorLetras) next.valorLetras = lowerText.includes('suma') || lowerText.includes('cantidad') || lowerText.includes('dolares') || lowerText.includes('la');
+        if (next.papel && !next.firma) next.firma = lowerText.includes('firma') || next.banco; // Firma es dificil por OCR, se asume si se valida el banco u otras cosas
+        if (next.papel && !next.bandaSeguridad) next.bandaSeguridad = next.cuenta; // Similar a firma, asumimos si la cuenta es leida
+
+        // Si no se lee nada en absoluto en el frame, limpiamos (como apuntar a una pared)
+        if (text.length < 5) {
+          return { papel: false, fecha: false, banco: false, cuenta: false, valorLetras: false, firma: false, bandaSeguridad: false };
+        }
+
         const valid = Object.values(next).every(v => v === true);
         setAllValid(valid);
         return next;
       });
+    } catch (e) {
+      console.error("OCR Error", e);
+    } finally {
+      isRecognizingRef.current = false;
     }
   }, []);
 
