@@ -298,8 +298,8 @@ export default function ReviewCapture() {
             </div>
           </div>
 
-          <p className="text-sm opacity-80 text-center">
-            Revisa los campos extraídos. Corrige los campos en rojo para poder continuar.
+          <p className="text-sm opacity-80 text-center font-medium">
+            Revisa los campos extraídos. Si hay algún campo bloqueado en rojo (❌), deberás volver a tomar la foto.
           </p>
 
           {/* Form / Checklist */}
@@ -327,10 +327,12 @@ export default function ReviewCapture() {
             <div className="flex flex-col gap-1">
               <label className="text-xs font-bold uppercase tracking-wider opacity-70">Monto en Letras</label>
               <div className="flex items-center gap-2">
-                <StatusIcon valid={vMontoLetras} />
+                <StatusIcon valid={vMontoLetras && vMontosCoinciden} />
                 <input type="text" value={montoLetras} readOnly placeholder="Lectura Automática" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
               </div>
-              <span className="text-[10px] text-red-400 opacity-80">* Los montos numérico y en letras deben coincidir. No se pueden corregir manualmente.</span>
+              {!vMontosCoinciden && (
+                <span className="text-[10px] text-red-400 font-bold opacity-100">* Los montos numérico y en letras deben coincidir. No se pueden corregir manualmente.</span>
+              )}
             </div>
 
             {/* Banco */}
@@ -378,7 +380,9 @@ export default function ReviewCapture() {
                 <StatusIcon valid={vBeneficiario} />
                 <input type="text" value={beneficiario} readOnly placeholder="Lectura Automática" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
               </div>
-              <span className="text-[10px] text-red-400 opacity-80">* No se puede corregir manualmente. Si es incorrecto, retome la foto.</span>
+              {!vBeneficiario && (
+                <span className="text-[10px] text-red-400 font-bold opacity-100">* Nombre inválido. No se puede corregir manualmente. Si es incorrecto, retome la foto.</span>
+              )}
             </div>
 
             {/* Toggles booleanos */}
