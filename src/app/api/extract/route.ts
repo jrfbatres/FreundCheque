@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       Responde EXCLUSIVAMENTE con un objeto JSON válido con las siguientes claves (no uses markdown \`\`\`json, solo el JSON puro):
       {
         "esCheque": true o false (booleano, true si la imagen es claramente un cheque bancario, false si es un recibo, persona, paisaje u otra cosa),
-        "esOriginal": true o false (booleano, true si el cheque parece ser un documento físico original en color, false si parece una fotocopia en blanco y negro, impreso en papel bond regular, o una foto tomada de una pantalla),
+        "esOriginal": true o false (booleano, false si detectas un patrón de píxeles de pantalla, efecto moiré, bordes de celular, tablet o monitor de computadora, reflejos de vidrio de pantalla, o si es una fotocopia. DEBE ser un cheque físico de papel real. true si es un cheque original en papel real),
         "alteraciones": true o false (booleano, true si el cheque presenta tachaduras, manchas, correcciones, dobleces extremos o alteraciones visibles, false si está limpio),
         "montosCoinciden": true o false (booleano, true si el valor del monto numérico representa exactamente la misma cantidad que el monto escrito en letras, false si difieren o si falta alguno),
         "fecha": "Extrae la fecha en formato DD/MM/YYYY si la encuentras, de lo contrario un string vacío",

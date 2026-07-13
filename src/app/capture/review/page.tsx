@@ -347,7 +347,7 @@ export default function ReviewCapture() {
                 
                 <div className="flex items-center gap-2 opacity-80">
                   <StatusIcon valid={vEsOriginal} />
-                  <span className="text-sm font-semibold select-none">Cheque Original (No fotocopia)</span>
+                  <span className="text-sm font-semibold select-none">Papel Original (No pantallas/copias)</span>
                 </div>
               </div>
 
