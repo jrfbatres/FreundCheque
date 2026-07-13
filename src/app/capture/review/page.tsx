@@ -65,6 +65,7 @@ export default function ReviewCapture() {
   const [beneficiario, setBeneficiario] = useState('');
   const [firma, setFirma] = useState(false);
   const [sinTachaduras, setSinTachaduras] = useState(true);
+  const [montosCoinciden, setMontosCoinciden] = useState(false);
   const [esCheque, setEsCheque] = useState<boolean | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -107,6 +108,7 @@ export default function ReviewCapture() {
           setBeneficiario(aiData.beneficiario || '');
           setFirma(aiData.firma || false);
           setSinTachaduras(!aiData.alteraciones); // Si hay alteraciones, tachaduras es false
+          setMontosCoinciden(aiData.montosCoinciden || false);
         }
       } catch (err: any) {
         console.error("AI Error:", err);
@@ -134,8 +136,9 @@ export default function ReviewCapture() {
   const vBeneficiario = isValidBeneficiario(beneficiario);
   const vFirma = firma;
   const vTachaduras = sinTachaduras;
+  const vMontosCoinciden = montosCoinciden;
 
-  const allValid = vFecha && vMonto && vMontoLetras && vBanco && vCuenta && vEmisor && vBeneficiario && vFirma && vTachaduras;
+  const allValid = vFecha && vMonto && vMontoLetras && vBanco && vCuenta && vEmisor && vBeneficiario && vFirma && vTachaduras && vMontosCoinciden;
 
   const StatusIcon = ({ valid }: { valid: boolean }) => (
     valid ? <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" /> : <XCircle className="w-5 h-5 text-red-500 shrink-0" />
@@ -279,7 +282,7 @@ export default function ReviewCapture() {
               <label className="text-xs font-bold uppercase tracking-wider opacity-70">Monto numérico (&gt; 0)</label>
               <div className="flex items-center gap-2">
                 <StatusIcon valid={vMonto} />
-                <input type="text" value={monto} onChange={(e) => setMonto(e.target.value)} placeholder="Ej. 150.00" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+                <input type="text" value={monto} readOnly placeholder="Lectura Automática" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
               </div>
             </div>
 
@@ -288,8 +291,9 @@ export default function ReviewCapture() {
               <label className="text-xs font-bold uppercase tracking-wider opacity-70">Monto en Letras</label>
               <div className="flex items-center gap-2">
                 <StatusIcon valid={vMontoLetras} />
-                <input type="text" value={montoLetras} onChange={(e) => setMontoLetras(e.target.value)} placeholder="Ciento cincuenta dólares" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+                <input type="text" value={montoLetras} readOnly placeholder="Lectura Automática" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
               </div>
+              <span className="text-[10px] text-red-400 opacity-80">* Los montos numérico y en letras deben coincidir. No se pueden corregir manualmente.</span>
             </div>
 
             {/* Banco */}
@@ -330,15 +334,25 @@ export default function ReviewCapture() {
             </div>
 
             {/* Toggles booleanos */}
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-700/50">
-              <div className="flex items-center gap-2 opacity-80">
-                <StatusIcon valid={vFirma} />
-                <span className="text-sm font-semibold select-none">Contiene Firma</span>
+            <div className="flex flex-col gap-3 mt-2 pt-4 border-t border-slate-700/50">
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 opacity-80">
+                  <StatusIcon valid={vMontosCoinciden} />
+                  <span className="text-sm font-semibold select-none">Montos (Números y Letras) Coinciden</span>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 opacity-80">
-                <StatusIcon valid={vTachaduras} />
-                <span className="text-sm font-semibold select-none">Sin Alteraciones o Manchas</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 opacity-80">
+                  <StatusIcon valid={vFirma} />
+                  <span className="text-sm font-semibold select-none">Contiene Firma</span>
+                </div>
+
+                <div className="flex items-center gap-2 opacity-80">
+                  <StatusIcon valid={vTachaduras} />
+                  <span className="text-sm font-semibold select-none">Sin Alteraciones o Manchas</span>
+                </div>
               </div>
             </div>
 
