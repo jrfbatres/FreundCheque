@@ -222,13 +222,13 @@ export default function ReviewCapture() {
       <footer className={`shrink-0 p-3 border-t flex flex-row gap-3 ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
         <Link 
           href="/capture/front"
-          className={`py-3 px-4 rounded-lg font-bold flex items-center justify-center transition-colors ${
+          className={`py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors ${
             theme === 'dark' 
               ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' 
               : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
           }`}
         >
-          <X className="w-5 h-5" /> 
+          <X className="w-5 h-5" /> Volver a Tomar
         </Link>
         
         <button 
