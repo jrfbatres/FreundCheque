@@ -65,6 +65,7 @@ export default function ReviewCapture() {
   const [beneficiario, setBeneficiario] = useState('');
   const [firma, setFirma] = useState(false);
   const [sinTachaduras, setSinTachaduras] = useState(true);
+  const [esCheque, setEsCheque] = useState<boolean | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
@@ -92,6 +93,11 @@ export default function ReviewCapture() {
         
         const aiData = json.data;
         if (aiData) {
+          if (aiData.esCheque === false) {
+            setEsCheque(false);
+            return;
+          }
+          setEsCheque(true);
           setFecha(aiData.fecha || '');
           setMonto(aiData.monto || '');
           setMontoLetras(aiData.montoLetras || '');
@@ -100,6 +106,7 @@ export default function ReviewCapture() {
           setEmisor(aiData.emisor || '');
           setBeneficiario(aiData.beneficiario || '');
           setFirma(aiData.firma || false);
+          setSinTachaduras(!aiData.alteraciones); // Si hay alteraciones, tachaduras es false
         }
       } catch (err: any) {
         console.error("AI Error:", err);
@@ -184,6 +191,26 @@ export default function ReviewCapture() {
             Volver al Inicio
           </button>
         </footer>
+      </div>
+    );
+  }
+
+  if (esCheque === false) {
+    return (
+      <div className={`h-[100dvh] w-full ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} flex flex-col items-center justify-center p-6 text-center`}>
+        <div className="bg-red-500/20 p-6 rounded-full mb-6 border-4 border-red-500">
+          <XCircle className="w-16 h-16 text-red-500" />
+        </div>
+        <h1 className="text-2xl font-bold mb-4">No es un cheque</h1>
+        <p className="opacity-80 mb-8 max-w-sm">
+          La imagen capturada no parece ser un cheque válido. Por favor, asegúrese de enfocar correctamente un cheque bancario y vuelva a intentarlo.
+        </p>
+        <button 
+          onClick={() => router.push('/capture/front')}
+          className="py-4 px-8 rounded-full font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all w-full max-w-sm"
+        >
+          Volver a Tomar
+        </button>
       </div>
     );
   }
@@ -297,8 +324,9 @@ export default function ReviewCapture() {
               <label className="text-xs font-bold uppercase tracking-wider opacity-70">Beneficiario (FREUND LTDA de C.V.)</label>
               <div className="flex items-center gap-2">
                 <StatusIcon valid={vBeneficiario} />
-                <input type="text" value={beneficiario} onChange={(e) => setBeneficiario(e.target.value)} placeholder="Ej. FREUND LTDA de C.V." className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+                <input type="text" value={beneficiario} readOnly placeholder="Lectura Automática" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
               </div>
+              <span className="text-[10px] text-red-400 opacity-80">* No se puede corregir manualmente. Si es incorrecto, retome la foto.</span>
             </div>
 
             {/* Toggles booleanos */}
@@ -308,9 +336,9 @@ export default function ReviewCapture() {
                 <span className="text-sm font-semibold select-none">Contiene Firma</span>
               </div>
 
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => setSinTachaduras(!sinTachaduras)}>
+              <div className="flex items-center gap-2 opacity-80">
                 <StatusIcon valid={vTachaduras} />
-                <span className="text-sm font-semibold select-none">Sin Tachaduras</span>
+                <span className="text-sm font-semibold select-none">Sin Alteraciones o Manchas</span>
               </div>
             </div>
 

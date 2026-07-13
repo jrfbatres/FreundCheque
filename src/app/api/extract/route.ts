@@ -31,6 +31,8 @@ export async function POST(req: NextRequest) {
       Analiza la siguiente imagen de un cheque y extrae los datos exactamente como aparecen.
       Responde EXCLUSIVAMENTE con un objeto JSON válido con las siguientes claves (no uses markdown \`\`\`json, solo el JSON puro):
       {
+        "esCheque": true o false (booleano, true si la imagen es claramente un cheque bancario, false si es un recibo, persona, paisaje u otra cosa),
+        "alteraciones": true o false (booleano, true si el cheque presenta tachaduras, manchas, correcciones, dobleces extremos o alteraciones visibles, false si está limpio),
         "fecha": "Extrae la fecha en formato DD/MM/YYYY si la encuentras, de lo contrario un string vacío",
         "monto": "Extrae el monto numérico exacto sin símbolo de dólar ni comas, solo números y punto decimal (ej: 150.00). Si no encuentras, string vacío",
         "montoLetras": "Extrae el monto escrito en palabras completas (ej: Ciento cincuenta dólares). Si no encuentras, string vacío",
