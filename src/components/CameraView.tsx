@@ -105,7 +105,7 @@ export default function CameraView({ onCapture, isCapturing, onAnalyze, children
         className="absolute inset-0 w-full h-full object-cover"
       />
       <canvas ref={canvasRef} className="hidden" />
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0">
         {children}
       </div>
     </div>
