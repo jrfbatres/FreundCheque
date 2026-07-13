@@ -22,7 +22,10 @@ export default function CaptureBack() {
 
   const [allValid, setAllValid] = useState(false);
 
-  const handleAnalyze = useCallback((imageData: ImageData) => {
+  const handleAnalyze = useCallback((canvas: HTMLCanvasElement) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     const width = imageData.width;
     const height = imageData.height;
