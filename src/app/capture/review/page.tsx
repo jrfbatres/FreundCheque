@@ -61,6 +61,7 @@ export default function ReviewCapture() {
   
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isFinished, setIsFinished] = useState(false);
 
   // Call API to process image
   useEffect(() => {
@@ -125,6 +126,60 @@ export default function ReviewCapture() {
   const StatusIcon = ({ valid }: { valid: boolean }) => (
     valid ? <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" /> : <XCircle className="w-5 h-5 text-red-500 shrink-0" />
   );
+
+  if (isFinished) {
+    const finalData = {
+      fecha,
+      monto,
+      montoLetras,
+      banco,
+      cuenta,
+      emisor,
+      beneficiario,
+      firma,
+      sinTachaduras,
+      imagenBase64: frontImageBase64
+    };
+
+    return (
+      <div className={`h-[100dvh] w-full ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} flex flex-col overflow-hidden`}>
+        <header className={`shrink-0 p-3 flex items-center justify-between border-b ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
+          <h1 className="text-lg font-bold text-emerald-500 flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5" /> Proceso Finalizado
+          </h1>
+        </header>
+        <main className="flex-1 overflow-y-auto w-full p-4">
+          <div className="max-w-2xl mx-auto flex flex-col gap-4">
+            <p className="text-sm opacity-80">
+              Todos los datos fueron validados correctamente. A continuación se muestra el JSON final generado que sería enviado al backend.
+            </p>
+            <div className={`rounded-xl p-4 overflow-x-auto text-xs font-mono shadow-inner border ${theme === 'dark' ? 'bg-slate-900 border-slate-700' : 'bg-slate-100 border-slate-300'}`}>
+              <pre className="break-all whitespace-pre-wrap">
+                {JSON.stringify(finalData, null, 2).substring(0, 500) + '\n  ...\n  "imagenBase64": "[BASE64_STRING_TRUNCATED]"\n}'}
+              </pre>
+            </div>
+            <div className="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700 shrink-0 mt-4">
+              <div className="relative w-full aspect-[21/9] bg-black">
+                <img 
+                  src={frontImageBase64} 
+                  alt="Cheque Escaneado" 
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        </main>
+        <footer className={`shrink-0 p-3 border-t flex ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
+          <button 
+            onClick={() => router.push('/')}
+            className="flex-1 py-3 px-4 rounded-lg font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all"
+          >
+            Volver al Inicio
+          </button>
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className={`h-[100dvh] w-full ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} flex flex-col overflow-hidden`}>
@@ -271,7 +326,7 @@ export default function ReviewCapture() {
         </Link>
         
         <button 
-          onClick={() => allValid && router.push('/capture/back')}
+          onClick={() => allValid && setIsFinished(true)}
           disabled={!allValid}
           className={`flex-1 py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${
             allValid 
@@ -279,7 +334,7 @@ export default function ReviewCapture() {
               : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
           }`}
         >
-          Continuar al Reverso <ArrowRight className="w-5 h-5" />
+          Finalizar <Check className="w-5 h-5" />
         </button>
       </footer>
     </div>
