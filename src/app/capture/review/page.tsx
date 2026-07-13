@@ -305,13 +305,25 @@ export default function ReviewCapture() {
           {/* Form / Checklist */}
           <div className={`rounded-xl p-4 flex flex-col gap-3 shadow-inner ${theme === 'dark' ? 'bg-slate-900/50 border border-slate-800' : 'bg-white border border-slate-200'}`}>
             
-            {/* Fecha */}
+            {/* Emisor */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Fecha (DD/MM/YYYY) [-3 meses a +1 mes]</label>
+              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Emisor (Quien da el cheque)</label>
               <div className="flex items-center gap-2">
-                <StatusIcon valid={vFecha} />
-                <input type="text" value={fecha} onChange={(e) => setFecha(e.target.value)} placeholder="Ej. 15/05/2026" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+                <StatusIcon valid={vEmisor} />
+                <input type="text" value={emisor} onChange={(e) => setEmisor(e.target.value)} placeholder="Nombre del emisor" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
               </div>
+            </div>
+
+            {/* Beneficiario */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Beneficiario (FREUND / FREUND DE EL SALVADOR)</label>
+              <div className="flex items-center gap-2">
+                <StatusIcon valid={vBeneficiario} />
+                <input type="text" value={beneficiario} readOnly placeholder="Lectura Automática" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
+              </div>
+              {!vBeneficiario && (
+                <span className="text-[10px] text-red-400 font-bold opacity-100">* Nombre inválido. No se puede corregir manualmente. Si es incorrecto, retome la foto.</span>
+              )}
             </div>
 
             {/* Monto */}
@@ -335,6 +347,15 @@ export default function ReviewCapture() {
               )}
             </div>
 
+            {/* Fecha */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Fecha (DD/MM/YYYY) [-3 meses a +1 mes]</label>
+              <div className="flex items-center gap-2">
+                <StatusIcon valid={vFecha} />
+                <input type="text" value={fecha} onChange={(e) => setFecha(e.target.value)} placeholder="Ej. 15/05/2026" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+              </div>
+            </div>
+
             {/* Banco */}
             <div className="flex flex-col gap-1">
               <label className="text-xs font-bold uppercase tracking-wider opacity-70">Nombre del Banco</label>
@@ -344,45 +365,22 @@ export default function ReviewCapture() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {/* Número de Cheque */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase tracking-wider opacity-70">N° Cheque</label>
-                <div className="flex items-center gap-2">
-                  <StatusIcon valid={numeroCheque.length > 0} />
-                  <input type="text" value={numeroCheque} readOnly placeholder="Lectura Auto" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
-                </div>
-              </div>
-
-              {/* Cuenta */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase tracking-wider opacity-70">N° Cuenta</label>
-                <div className="flex items-center gap-2">
-                  <StatusIcon valid={vCuenta} />
-                  <input type="text" value={cuenta} onChange={(e) => setCuenta(e.target.value)} placeholder="N° Cuenta" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
-                </div>
+            {/* Cuenta */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold uppercase tracking-wider opacity-70">N° Cuenta</label>
+              <div className="flex items-center gap-2">
+                <StatusIcon valid={vCuenta} />
+                <input type="text" value={cuenta} onChange={(e) => setCuenta(e.target.value)} placeholder="N° Cuenta" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
               </div>
             </div>
 
-            {/* Emisor */}
+            {/* Número de Cheque */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Emisor (Quien da el cheque)</label>
+              <label className="text-xs font-bold uppercase tracking-wider opacity-70">N° Cheque</label>
               <div className="flex items-center gap-2">
-                <StatusIcon valid={vEmisor} />
-                <input type="text" value={emisor} onChange={(e) => setEmisor(e.target.value)} placeholder="Nombre del emisor" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+                <StatusIcon valid={numeroCheque.length > 0} />
+                <input type="text" value={numeroCheque} readOnly placeholder="Lectura Auto" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
               </div>
-            </div>
-
-            {/* Beneficiario */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Beneficiario (FREUND / FREUND DE EL SALVADOR)</label>
-              <div className="flex items-center gap-2">
-                <StatusIcon valid={vBeneficiario} />
-                <input type="text" value={beneficiario} readOnly placeholder="Lectura Automática" className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
-              </div>
-              {!vBeneficiario && (
-                <span className="text-[10px] text-red-400 font-bold opacity-100">* Nombre inválido. No se puede corregir manualmente. Si es incorrecto, retome la foto.</span>
-              )}
             </div>
 
             {/* Toggles booleanos */}
