@@ -24,16 +24,43 @@ export default function CaptureBack() {
 
   const handleAnalyze = useCallback((imageData: ImageData) => {
     const data = imageData.data;
-    let brightPixels = 0;
-    // Sample to save CPU
-    for (let i = 0; i < data.length; i += 16) {
-      const r = data[i];
-      const g = data[i+1];
-      const b = data[i+2];
-      if (r > 160 && g > 160 && b > 160) brightPixels++;
+    const width = imageData.width;
+    const height = imageData.height;
+    
+    let centerBrightPixels = 0;
+    let edgeDarkPixels = 0;
+    let centerSampleCount = 0;
+    let edgeSampleCount = 0;
+
+    // Define center area (the check) and edge area (the desk)
+    const marginX = width * 0.15;
+    const marginY = height * 0.15;
+
+    for (let y = 0; y < height; y += 4) {
+      for (let x = 0; x < width; x += 4) {
+        const i = (y * width + x) * 4;
+        const r = data[i];
+        const g = data[i+1];
+        const b = data[i+2];
+        const isBright = r > 160 && g > 160 && b > 160;
+
+        if (x > marginX && x < width - marginX && y > marginY && y < height - marginY) {
+          // Center area
+          if (isBright) centerBrightPixels++;
+          centerSampleCount++;
+        } else {
+          // Edge area
+          if (!isBright) edgeDarkPixels++;
+          edgeSampleCount++;
+        }
+      }
     }
-    const totalSampled = data.length / 16;
-    const isPaper = (brightPixels / totalSampled) > 0.3; // At least 30% white/bright pixels
+
+    const centerBrightRatio = centerBrightPixels / centerSampleCount;
+    const edgeDarkRatio = edgeDarkPixels / edgeSampleCount;
+
+    // Heurística: El centro debe ser mayormente claro (papel) y los bordes más oscuros (la mesa)
+    const isPaper = centerBrightRatio > 0.4 && edgeDarkRatio > 0.4;
 
     if (!isPaper) {
       setValidations({ reversoCompleto: false, sinReflejos: false });
