@@ -9,7 +9,7 @@ import Image from 'next/image';
 
 export default function CaptureFront() {
   const router = useRouter();
-  const { setFrontImageBase64, theme, toggleTheme } = useAppStore();
+  const { setFrontImageBase64, theme, toggleTheme, setExtractedText } = useAppStore();
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   
@@ -25,6 +25,7 @@ export default function CaptureFront() {
 
   const [allValid, setAllValid] = useState(false);
   const isRecognizingRef = useRef(false);
+  const lastExtractedTextRef = useRef('');
 
   const handleAnalyze = useCallback(async (canvas: HTMLCanvasElement) => {
     // Avoid running OCR if it's already processing a frame
@@ -43,6 +44,11 @@ export default function CaptureFront() {
 
       const lowerText = text.toLowerCase();
       // console.log("OCR TEXT:", lowerText);
+      
+      // Solo guardar si hay algo sustancial
+      if (text.length > 10) {
+        lastExtractedTextRef.current = text;
+      }
 
       setValidations(prev => {
         const next = { ...prev };
@@ -78,10 +84,11 @@ export default function CaptureFront() {
 
   const handleCapture = useCallback((base64: string) => {
     setFrontImageBase64(base64);
+    setExtractedText(lastExtractedTextRef.current);
     setTimeout(() => {
-      router.push('/capture/back');
+      router.push('/capture/review');
     }, 500);
-  }, [setFrontImageBase64, router]);
+  }, [setFrontImageBase64, setExtractedText, router]);
 
   return (
     <CameraView onCapture={handleCapture} isCapturing={isCapturing} onAnalyze={handleAnalyze}>

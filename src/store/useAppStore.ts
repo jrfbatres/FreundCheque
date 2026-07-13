@@ -10,6 +10,8 @@ interface AppState {
   setFrontCoordenates: (coords: any) => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
+  extractedText: string;
+  setExtractedText: (text: string) => void;
   clearCaptureData: () => void;
 }
 
@@ -22,9 +24,11 @@ export const useAppStore = create<AppState>()(
       setFrontImageBase64: (base64) => set({ frontImageBase64: base64 }),
       frontCoordenates: null,
       setFrontCoordenates: (coords) => set({ frontCoordenates: coords }),
+      extractedText: '',
+      setExtractedText: (text) => set({ extractedText: text }),
       theme: 'dark',
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
-      clearCaptureData: () => set({ frontImageBase64: null, frontCoordenates: null }),
+      clearCaptureData: () => set({ frontImageBase64: null, frontCoordenates: null, extractedText: '' }),
     }),
     {
       name: 'freund-cheque-store',
