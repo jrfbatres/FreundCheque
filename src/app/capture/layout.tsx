@@ -2,9 +2,12 @@
 import { useEffect, useState } from 'react';
 import { Smartphone } from 'lucide-react';
 
+import { usePathname } from 'next/navigation';
+
 export default function CaptureLayout({ children }: { children: React.ReactNode }) {
   const [isPortrait, setIsPortrait] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
@@ -24,7 +27,8 @@ export default function CaptureLayout({ children }: { children: React.ReactNode 
 
   if (!mounted) return null;
 
-  if (isPortrait) {
+  // No requerir modo horizontal si estamos en la pantalla de revisión
+  if (isPortrait && pathname !== '/capture/review') {
     return (
       <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 text-white p-6 text-center">
         <div className="mb-8 animate-spin" style={{ animationDuration: '3s' }}>
