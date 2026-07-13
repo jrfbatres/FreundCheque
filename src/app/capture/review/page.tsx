@@ -51,12 +51,13 @@ export default function ReviewCapture() {
 
   const [fecha, setFecha] = useState('');
   const [monto, setMonto] = useState('');
+  const [montoLetras, setMontoLetras] = useState('');
   const [banco, setBanco] = useState('');
   const [cuenta, setCuenta] = useState('');
   const [emisor, setEmisor] = useState('');
   const [beneficiario, setBeneficiario] = useState('');
   const [firma, setFirma] = useState(false);
-  const [sinTachaduras, setSinTachaduras] = useState(true); // Default true since AI can't read it easily
+  const [sinTachaduras, setSinTachaduras] = useState(true);
 
   // Initial Parser
   useEffect(() => {
@@ -68,10 +69,18 @@ export default function ReviewCapture() {
     if (dateMatch) setFecha(dateMatch[0]);
 
     // Parse Amount (e.g. $ 1,500.00)
-    const amountMatch = extractedText.match(/\$?\s?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?\b/);
+    // Buscamos específicamente formato de dinero más estricto
+    const amountMatch = extractedText.match(/\$?\s?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})\b/);
     if (amountMatch) {
       const parsedAmount = amountMatch[0].replace(/[^0-9.,]/g, '');
       if (parseFloat(parsedAmount) > 0) setMonto(parsedAmount);
+    }
+
+    // Attempt to find amount in letters (look for "dolares", "exactos")
+    const words = lowerText.split(/\s+/);
+    const dolaresIndex = words.indexOf('dolares');
+    if (dolaresIndex > -1 && dolaresIndex > 1) {
+      setMontoLetras(words.slice(Math.max(0, dolaresIndex - 4), dolaresIndex + 1).join(' '));
     }
 
     // Parse Cuenta (8+ digits)
@@ -96,6 +105,7 @@ export default function ReviewCapture() {
   // Validations
   const vFecha = isValidDate(fecha);
   const vMonto = isValidAmount(monto);
+  const vMontoLetras = montoLetras.trim().length > 3;
   const vBanco = banco.trim().length > 0;
   const vCuenta = cuenta.trim().length > 0;
   const vEmisor = emisor.trim().length > 0;
@@ -103,7 +113,7 @@ export default function ReviewCapture() {
   const vFirma = firma;
   const vTachaduras = sinTachaduras;
 
-  const allValid = vFecha && vMonto && vBanco && vCuenta && vEmisor && vBeneficiario && vFirma && vTachaduras;
+  const allValid = vFecha && vMonto && vMontoLetras && vBanco && vCuenta && vEmisor && vBeneficiario && vFirma && vTachaduras;
 
   const StatusIcon = ({ valid }: { valid: boolean }) => (
     valid ? <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" /> : <XCircle className="w-5 h-5 text-red-500 shrink-0" />
@@ -161,6 +171,15 @@ export default function ReviewCapture() {
               <div className="flex items-center gap-2">
                 <StatusIcon valid={vMonto} />
                 <input type="text" value={monto} onChange={(e) => setMonto(e.target.value)} placeholder="Ej. 150.00" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+              </div>
+            </div>
+
+            {/* Monto Letras */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Monto en Letras</label>
+              <div className="flex items-center gap-2">
+                <StatusIcon valid={vMontoLetras} />
+                <input type="text" value={montoLetras} onChange={(e) => setMontoLetras(e.target.value)} placeholder="Ciento cincuenta dólares" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
               </div>
             </div>
 
