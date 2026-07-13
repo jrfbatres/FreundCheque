@@ -58,44 +58,51 @@ export default function ReviewCapture() {
   const [beneficiario, setBeneficiario] = useState('');
   const [firma, setFirma] = useState(false);
   const [sinTachaduras, setSinTachaduras] = useState(true);
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // Initial Parser
+  // Call API to process image
   useEffect(() => {
-    if (!extractedText) return;
-    const lowerText = extractedText.toLowerCase();
+    if (!frontImageBase64) return;
     
-    // Parse Date (DD/MM/YYYY)
-    const dateMatch = extractedText.match(/\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/);
-    if (dateMatch) setFecha(dateMatch[0]);
+    // Si ya lo parseó antes, no volver a llamarlo en hot-reloads
+    if (banco !== '' && !isLoading) return;
 
-    // Parse Amount (e.g. $ 1,500.00)
-    // Buscamos específicamente formato de dinero más estricto
-    const amountMatch = extractedText.match(/\$?\s?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})\b/);
-    if (amountMatch) {
-      const parsedAmount = amountMatch[0].replace(/[^0-9.,]/g, '');
-      if (parseFloat(parsedAmount) > 0) setMonto(parsedAmount);
-    }
+    const processImage = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch('/api/extract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: frontImageBase64 })
+        });
+        
+        const json = await res.json();
+        
+        if (!res.ok) throw new Error(json.error || 'Error procesando la imagen');
+        
+        const aiData = json.data;
+        if (aiData) {
+          setFecha(aiData.fecha || '');
+          setMonto(aiData.monto || '');
+          setMontoLetras(aiData.montoLetras || '');
+          setBanco(aiData.banco || '');
+          setCuenta(aiData.cuenta || '');
+          setEmisor(aiData.emisor || '');
+          setBeneficiario(aiData.beneficiario || '');
+          setFirma(aiData.firma || false);
+        }
+      } catch (err: any) {
+        console.error("AI Error:", err);
+        setErrorMsg(err.message || 'Error analizando imagen');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // Attempt to find amount in letters (look for "dolares", "exactos")
-    const words = lowerText.split(/\s+/);
-    const dolaresIndex = words.indexOf('dolares');
-    if (dolaresIndex > -1 && dolaresIndex > 1) {
-      setMontoLetras(words.slice(Math.max(0, dolaresIndex - 4), dolaresIndex + 1).join(' '));
-    }
-
-    // Parse Cuenta (8+ digits)
-    const accMatch = extractedText.match(/\b\d{8,}\b/);
-    if (accMatch) setCuenta(accMatch[0]);
-
-    // Simple keyword checks for Banco
-    if (lowerText.includes('banco') || lowerText.includes('agricola') || lowerText.includes('cuscatlan')) {
-      setBanco('Detectado'); // Simplification for UI
-    }
-    
-    if (lowerText.includes('firma')) {
-      setFirma(true);
-    }
-  }, [extractedText]);
+    processImage();
+  }, [frontImageBase64]);
 
   if (!frontImageBase64) {
     if (typeof window !== 'undefined') router.push('/capture/front');
@@ -136,8 +143,21 @@ export default function ReviewCapture() {
 
       {/* Content - Vertical Layout */}
       <main className="flex-1 overflow-y-auto w-full p-4">
-        <div className="max-w-xl mx-auto flex flex-col gap-4">
+        <div className="max-w-xl mx-auto flex flex-col gap-4 relative">
           
+          {isLoading && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-700">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+              <p className="text-white font-bold animate-pulse">Analizando con Inteligencia Artificial...</p>
+            </div>
+          )}
+
+          {errorMsg && (
+            <div className="bg-red-500/20 border border-red-500 text-red-100 p-3 rounded-lg text-sm mb-2 text-center font-semibold">
+              {errorMsg}
+            </div>
+          )}
+
           {/* Image */}
           <div className="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700 shrink-0">
             <div className="relative w-full aspect-[21/9] bg-black">

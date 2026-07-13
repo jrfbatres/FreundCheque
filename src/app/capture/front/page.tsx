@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import CameraView from '@/components/CameraView';
 import { useAppStore } from '@/store/useAppStore';
@@ -9,74 +9,77 @@ import Image from 'next/image';
 
 export default function CaptureFront() {
   const router = useRouter();
-  const { setFrontImageBase64, theme, toggleTheme, setExtractedText } = useAppStore();
+  const { setFrontImageBase64, theme, toggleTheme } = useAppStore();
   const [isCapturing, setIsCapturing] = useState(false);
-  const [countdown, setCountdown] = useState<number | null>(null);
   
   const [validations, setValidations] = useState({
     papel: false,
-    fecha: false,
-    banco: false,
-    cuenta: false,
-    valorLetras: false,
-    firma: false,
-    bandaSeguridad: false,
+    iluminacion: false
   });
 
   const [allValid, setAllValid] = useState(false);
   const isRecognizingRef = useRef(false);
-  const lastExtractedTextRef = useRef('');
 
   const handleAnalyze = useCallback(async (canvas: HTMLCanvasElement) => {
-    // Avoid running OCR if it's already processing a frame
-    if (isRecognizingRef.current) return;
+    // Avoid running analysis if it's already processing a frame
+    if (isRecognizingRef.current || allValid) return;
     isRecognizingRef.current = true;
 
     try {
-      // Lazy load Tesseract
-      const Tesseract = (await import('tesseract.js')).default;
-      
-      const { data: { text } } = await Tesseract.recognize(
-        canvas,
-        'spa',
-        { logger: m => { /* console.log(m) */ } }
-      );
+      const context = canvas.getContext('2d');
+      if (!context) return;
 
-      const lowerText = text.toLowerCase();
-      // console.log("OCR TEXT:", lowerText);
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const width = imageData.width;
+      const height = imageData.height;
       
-      // Solo guardar si hay algo sustancial
-      if (text.length > 10) {
-        lastExtractedTextRef.current = text;
+      let centerBrightPixels = 0;
+      let edgeDarkPixels = 0;
+      let centerTotal = 0;
+      let edgeTotal = 0;
+
+      for (let y = 0; y < height; y += 10) {
+        for (let x = 0; x < width; x += 10) {
+          const i = (y * width + x) * 4;
+          const r = data[i];
+          const g = data[i+1];
+          const b = data[i+2];
+          
+          const brightness = (r + g + b) / 3;
+          
+          const isEdge = x < width * 0.1 || x > width * 0.9 || y < height * 0.1 || y > height * 0.9;
+          
+          if (isEdge) {
+            edgeTotal++;
+            if (brightness < 120) edgeDarkPixels++;
+          } else {
+            centerTotal++;
+            if (brightness > 150) centerBrightPixels++;
+          }
+        }
       }
 
-      setValidations(prev => {
-        const next = { ...prev };
-        
-        // Basic OCR heuristics
-        if (!next.papel) next.papel = text.length > 5; // Encontró al menos algunas letras/texto visible
-        if (next.papel && !next.banco) next.banco = lowerText.includes('banco') || lowerText.includes('bank');
-        if (next.papel && !next.cuenta) next.cuenta = lowerText.includes('cuenta') || /\b\d{8,}\b/.test(lowerText);
-        if (next.papel && !next.fecha) next.fecha = lowerText.includes('fecha') || lowerText.includes('date') || /\d{2}\/\d{2}/.test(lowerText) || /\d{4}/.test(lowerText);
-        if (next.papel && !next.valorLetras) next.valorLetras = lowerText.includes('suma') || lowerText.includes('cantidad') || lowerText.includes('dolares') || lowerText.includes('la');
-        if (next.papel && !next.firma) next.firma = lowerText.includes('firma') || next.banco; // Firma es dificil por OCR, se asume si se valida el banco u otras cosas
-        if (next.papel && !next.bandaSeguridad) next.bandaSeguridad = next.cuenta; // Similar a firma, asumimos si la cuenta es leida
+      const centerIsPaper = (centerBrightPixels / centerTotal) > 0.4; 
+      const edgeIsDark = (edgeDarkPixels / edgeTotal) > 0.3;
 
-        // Si no se lee nada en absoluto en el frame, limpiamos (como apuntar a una pared)
-        if (text.length < 5) {
-          return { papel: false, fecha: false, banco: false, cuenta: false, valorLetras: false, firma: false, bandaSeguridad: false };
-        }
+      const papelDetectado = centerIsPaper && edgeIsDark;
+      const iluminacionOk = (centerBrightPixels / centerTotal) > 0.2; // Al menos un 20% brillante
 
-        const valid = Object.values(next).every(v => v === true);
-        setAllValid(valid);
-        return next;
+      setValidations({
+        papel: papelDetectado,
+        iluminacion: iluminacionOk
       });
-    } catch (e) {
-      console.error("OCR Error", e);
+
+      if (papelDetectado && iluminacionOk) {
+        setAllValid(true);
+      }
+    } catch (error) {
+      console.error(error);
     } finally {
       isRecognizingRef.current = false;
     }
-  }, []);
+  }, [allValid]);
 
   const handleManualCapture = () => {
     setIsCapturing(true);
@@ -84,11 +87,10 @@ export default function CaptureFront() {
 
   const handleCapture = useCallback((base64: string) => {
     setFrontImageBase64(base64);
-    setExtractedText(lastExtractedTextRef.current);
     setTimeout(() => {
       router.push('/capture/review');
     }, 500);
-  }, [setFrontImageBase64, setExtractedText, router]);
+  }, [setFrontImageBase64, router]);
 
   return (
     <CameraView onCapture={handleCapture} isCapturing={isCapturing} onAnalyze={handleAnalyze}>
@@ -103,7 +105,7 @@ export default function CaptureFront() {
             height={40}
             className="object-contain"
           />
-          <h1 className="text-white text-xl font-bold drop-shadow-md">Escanear Cheque</h1>
+          <h1 className="text-white text-xl font-bold drop-shadow-md hidden sm:block">Escanear Cheque</h1>
         </div>
         
         <div className="flex items-center gap-3">
@@ -123,7 +125,7 @@ export default function CaptureFront() {
         </div>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center pt-12">
+      <div className="absolute inset-0 flex items-center justify-center pt-12 pointer-events-none">
         <div className="w-[85%] h-[75%] border-2 border-white/50 rounded-xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] relative">
           
           {/* Esquinas del AR */}
@@ -132,23 +134,23 @@ export default function CaptureFront() {
           <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-emerald-400 -mb-1 -ml-1 rounded-bl-lg transition-all duration-300" />
           <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-emerald-400 -mb-1 -mr-1 rounded-br-lg transition-all duration-300" />
           
-          {/* AR Checklist */}
-          <div className="absolute top-4 left-4 flex flex-col gap-1.5 text-[10px] sm:text-xs font-mono bg-black/70 p-3 rounded-lg backdrop-blur-md border border-white/10 shadow-xl">
+          {/* AR Checklist Simplificado */}
+          <div className="absolute top-4 left-4 flex flex-col gap-1.5 text-[10px] sm:text-xs font-mono bg-black/70 p-3 rounded-lg backdrop-blur-md border border-white/10 shadow-xl pointer-events-auto">
             {Object.entries(validations).map(([key, isValid]) => (
               <span key={key} className={isValid ? "text-emerald-400 flex items-center gap-2 transition-colors duration-300" : "text-slate-300 flex items-center gap-2 transition-colors duration-300"}>
-                {isValid ? "🟩" : "⬜"} {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim()}
+                {isValid ? "🟩" : "⬜"} {key.charAt(0).toUpperCase() + key.slice(1)}
               </span>
             ))}
           </div>
 
-          <div className="absolute -top-12 left-0 right-0 flex justify-center">
+          <div className="absolute -top-12 left-0 right-0 flex justify-center pointer-events-auto">
             <span className="bg-black/80 text-white px-6 py-2 rounded-full text-sm font-bold backdrop-blur-md border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-              Coloque el frente del cheque
+              {allValid ? '¡Listo para capturar!' : 'Encuadre el cheque'}
             </span>
           </div>
 
           {allValid && !isCapturing && (
-            <div className="absolute inset-x-0 bottom-4 flex justify-center z-50">
+            <div className="absolute inset-x-0 bottom-4 flex justify-center z-50 pointer-events-auto">
               <button 
                 onClick={handleManualCapture}
                 className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-12 rounded-full shadow-[0_10px_25px_rgba(16,185,129,0.5)] border border-emerald-400/50 transition-all hover:scale-105 active:scale-95 text-lg"
