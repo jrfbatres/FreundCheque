@@ -157,7 +157,7 @@ export default function ReviewCapture() {
 
             {/* Monto */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Monto numérico (> 0)</label>
+              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Monto numérico (&gt; 0)</label>
               <div className="flex items-center gap-2">
                 <StatusIcon valid={vMonto} />
                 <input type="text" value={monto} onChange={(e) => setMonto(e.target.value)} placeholder="Ej. 150.00" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
