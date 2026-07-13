@@ -45,6 +45,13 @@ const isValidAmount = (amountStr: string) => {
   return !isNaN(num) && num > 0;
 };
 
+const isValidBeneficiario = (ben: string) => {
+  if (!ben || ben.trim() === '') return false;
+  // Permite combinaciones de FREUND LTDA, FERRETERIAS FREUND LTDA DE CV ignorando puntos
+  const regex = /^(ferreterias?\s+)?freund(,\s*|\s+)ltda\.?(\s+de\s+c\.?v\.?)?$/i;
+  return regex.test(ben.trim());
+};
+
 export default function ReviewCapture() {
   const router = useRouter();
   const { frontImageBase64, extractedText, theme } = useAppStore();
@@ -117,7 +124,7 @@ export default function ReviewCapture() {
   const vBanco = banco.trim().length > 0;
   const vCuenta = cuenta.trim().length > 0;
   const vEmisor = emisor.trim().length > 0;
-  const vBeneficiario = beneficiario.trim().length > 0;
+  const vBeneficiario = isValidBeneficiario(beneficiario);
   const vFirma = firma;
   const vTachaduras = sinTachaduras;
 
@@ -287,10 +294,10 @@ export default function ReviewCapture() {
 
             {/* Beneficiario */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Beneficiario (A favor de)</label>
+              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Beneficiario (FREUND LTDA de C.V.)</label>
               <div className="flex items-center gap-2">
                 <StatusIcon valid={vBeneficiario} />
-                <input type="text" value={beneficiario} onChange={(e) => setBeneficiario(e.target.value)} placeholder="Nombre del beneficiario" className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+                <input type="text" value={beneficiario} onChange={(e) => setBeneficiario(e.target.value)} placeholder="Ej. FREUND LTDA de C.V." className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
               </div>
             </div>
 
