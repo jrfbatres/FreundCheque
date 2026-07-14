@@ -77,8 +77,20 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error('Error processing image with AI:', error);
+    
+    let userMessage = 'Error analizando la imagen con Inteligencia Artificial.';
+    
+    // Identificar errores específicos de la API Key (429: Cuota excedida, 403/400: Key inválida)
+    if (error?.status === 429) {
+      userMessage = 'Error de API Key: Has superado el límite de uso gratuito (Quota Exceeded). Por favor, intenta más tarde o cambia tu API Key.';
+    } else if (error?.status === 403 || error?.status === 400 || error?.message?.includes('API key not valid')) {
+      userMessage = 'Error de API Key: La llave de Google Gemini proporcionada es inválida o fue revocada.';
+    } else if (error?.message) {
+      userMessage = `Error interno de IA: ${error.message}`;
+    }
+
     return NextResponse.json({ 
-      error: 'Failed to process image', 
+      error: userMessage, 
       details: error.message 
     }, { status: 500 });
   }
