@@ -27,25 +27,31 @@ export async function POST(req: NextRequest) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
-      Eres un experto analista de cheques bancarios.
-      Analiza la siguiente imagen de un cheque y extrae los datos exactamente como aparecen.
-      Responde EXCLUSIVAMENTE con un objeto JSON válido con las siguientes claves (no uses markdown \`\`\`json, solo el JSON puro):
+      Eres un experto analista de documentos bancarios.
+      Analiza la siguiente imagen de un cheque y extrae los datos solicitados.
+
+      INSTRUCCIONES Y REGLAS ESTRICTAS:
+      1. Busca la palabra "CHEQUE" (en cualquier parte). Si NO tiene la palabra cheque impresa, asume que NO es un cheque (esCheque: false).
+      2. Extrae el EMISOR (quien firma o emite el cheque).
+      3. Extrae el BENEFICIARIO (a nombre de quien se emite).
+      4. Extrae el MONTO numérico y el monto en LETRAS. (Para que montosCoinciden sea true, el valor matemático debe ser idéntico).
+      5. Extrae la FECHA (en formato DD/MM/YYYY).
+      6. Extrae el nombre del BANCO, número de CUENTA y el NÚMERO DE SERIE (o número de cheque).
+      7. Extrae toda la línea MICR que aparece en la parte inferior.
+
+      Responde EXCLUSIVAMENTE con un objeto JSON válido con las siguientes claves:
       {
-        "esCheque": true o false (booleano, true si la imagen es claramente un cheque bancario, false si es un recibo, persona, paisaje u otra cosa),
-        "esOriginal": true o false (booleano, false si detectas un patrón de píxeles de pantalla, efecto moiré, bordes de celular, tablet o monitor de computadora, reflejos de vidrio de pantalla, o si es una fotocopia. DEBE ser un cheque físico de papel real. true si es un cheque original en papel real),
-        "alteraciones": true o false (booleano, true si el cheque presenta tachaduras, manchas, correcciones, dobleces extremos o alteraciones visibles, false si está limpio),
-        "montosCoinciden": true o false (booleano, true si el valor del monto numérico representa exactamente la misma cantidad que el monto escrito en letras, false si difieren o si falta alguno),
-        "tieneMICR": true o false (booleano, true si el cheque contiene una banda magnética MICR válida en la parte inferior con tipografía E-13B o CMC-7, false en caso contrario),
-        "lineaMICR": "Extrae el texto completo de la banda magnética MICR inferior exactamente como aparece, incluyendo los caracteres especiales si puedes interpretarlos. Si no encuentras, string vacío",
-        "numeroCheque": "Extrae el número de cheque (suele estar en la esquina superior derecha y repetido en la línea MICR). Si no lo encuentras, string vacío",
-        "fecha": "Extrae la fecha en formato DD/MM/YYYY si la encuentras, de lo contrario un string vacío",
-        "monto": "Extrae el monto numérico exacto sin símbolo de dólar ni comas, solo números y punto decimal (ej: 150.00). Si no encuentras, string vacío",
-        "montoLetras": "Extrae el monto escrito en palabras completas (ej: Ciento cincuenta dólares). Si no encuentras, string vacío",
-        "banco": "Extrae el nombre del banco emisor. Si no encuentras, string vacío",
-        "cuenta": "Extrae el número de cuenta bancaria si es visible. Si no encuentras, string vacío",
-        "emisor": "Extrae el nombre de quien firma o emite el cheque. Si no encuentras, string vacío",
-        "beneficiario": "Extrae el nombre de a favor de quien se emite (paguese a la orden de). Si no encuentras, string vacío",
-        "firma": true (booleano, true si detectas cualquier firma manuscrita, false si no)
+        "esCheque": true o false (booleano, true solo si encuentras la palabra CHEQUE),
+        "emisor": "Nombre del emisor",
+        "beneficiario": "Nombre del beneficiario",
+        "monto": "Monto numérico exacto sin comas (ej: 150.00)",
+        "montoLetras": "Monto escrito en letras",
+        "montosCoinciden": true o false (true si monto y montoLetras representan exactamente el mismo valor),
+        "fecha": "Fecha en formato DD/MM/YYYY",
+        "banco": "Nombre del banco",
+        "cuenta": "Numero de cuenta",
+        "numeroSerie": "Numero de serie o cheque",
+        "lineaMICR": "Texto completo de la banda magnética MICR inferior"
       }
     `;
 
