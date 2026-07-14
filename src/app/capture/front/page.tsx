@@ -139,33 +139,37 @@ export default function CaptureFront() {
       <div className="absolute inset-0 flex items-center justify-center pt-12 pointer-events-none">
         <div className="w-[85%] h-[75%] border-2 border-white/50 rounded-xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] relative">
           
-          {/* Esquinas del AR */}
-          <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-emerald-400 -mt-1 -ml-1 rounded-tl-lg transition-all duration-300" />
-          <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-emerald-400 -mt-1 -mr-1 rounded-tr-lg transition-all duration-300" />
-          <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-emerald-400 -mb-1 -ml-1 rounded-bl-lg transition-all duration-300" />
-          <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-emerald-400 -mb-1 -mr-1 rounded-br-lg transition-all duration-300" />
-          
-          {/* AR Target MICR */}
-          <div className="absolute bottom-6 left-6 right-6 h-12 border-2 border-dashed border-emerald-400/50 rounded flex items-center justify-center bg-emerald-500/10 pointer-events-none transition-all duration-500">
-            <span className="text-emerald-300/80 text-[10px] font-mono font-bold tracking-widest uppercase">
-              Alinear Banda Inferior MICR Aquí
-            </span>
-          </div>
+          {!isCapturing && (
+            <>
+              {/* Esquinas del AR */}
+              <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-emerald-400 -mt-1 -ml-1 rounded-tl-lg transition-all duration-300" />
+              <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-emerald-400 -mt-1 -mr-1 rounded-tr-lg transition-all duration-300" />
+              <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-emerald-400 -mb-1 -ml-1 rounded-bl-lg transition-all duration-300" />
+              <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-emerald-400 -mb-1 -mr-1 rounded-br-lg transition-all duration-300" />
+              
+              {/* AR Target MICR */}
+              <div className="absolute bottom-6 left-6 right-6 h-12 border-2 border-dashed border-emerald-400/50 rounded flex items-center justify-center bg-emerald-500/10 pointer-events-none transition-all duration-500">
+                <span className="text-emerald-300/80 text-[10px] font-mono font-bold tracking-widest uppercase">
+                  Alinear Banda Inferior MICR Aquí
+                </span>
+              </div>
 
-          {/* AR Checklist Simplificado */}
-          <div className="absolute top-4 left-4 flex flex-col gap-1.5 text-[10px] sm:text-xs font-mono bg-black/70 p-3 rounded-lg backdrop-blur-md border border-white/10 shadow-xl pointer-events-auto">
-            {Object.entries(validations).map(([key, isValid]) => (
-              <span key={key} className={isValid ? "text-emerald-400 flex items-center gap-2 transition-colors duration-300" : "text-slate-300 flex items-center gap-2 transition-colors duration-300"}>
-                {isValid ? "🟩" : "⬜"} {key.charAt(0).toUpperCase() + key.slice(1)}
-              </span>
-            ))}
-          </div>
+              {/* AR Checklist Simplificado */}
+              <div className="absolute top-4 left-4 flex flex-col gap-1.5 text-[10px] sm:text-xs font-mono bg-black/70 p-3 rounded-lg backdrop-blur-md border border-white/10 shadow-xl pointer-events-auto">
+                {Object.entries(validations).map(([key, isValid]) => (
+                  <span key={key} className={isValid ? "text-emerald-400 flex items-center gap-2 transition-colors duration-300" : "text-slate-300 flex items-center gap-2 transition-colors duration-300"}>
+                    {isValid ? "🟩" : "⬜"} {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </span>
+                ))}
+              </div>
 
-          <div className="absolute -top-12 left-0 right-0 flex justify-center pointer-events-auto">
-            <span className="bg-black/80 text-white px-6 py-2 rounded-full text-sm font-bold backdrop-blur-md border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-              {allValid ? '¡Listo para capturar!' : 'Encuadre el cheque'}
-            </span>
-          </div>
+              <div className="absolute -top-12 left-0 right-0 flex justify-center pointer-events-auto">
+                <span className="bg-black/80 text-white px-6 py-2 rounded-full text-sm font-bold backdrop-blur-md border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                  {allValid ? '¡Listo para capturar!' : 'Encuadre el cheque'}
+                </span>
+              </div>
+            </>
+          )}
 
           {allValid && !isCapturing && (
             <div className="absolute inset-x-0 bottom-4 flex justify-center z-50 pointer-events-auto">
