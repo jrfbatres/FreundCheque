@@ -179,7 +179,18 @@ export default function CaptureFront() {
           )}
 
           {isCapturing && (
-            <div className="absolute inset-0 bg-white z-20 rounded-lg shadow-[0_0_50px_rgba(255,255,255,1)]" style={{ animation: 'flash 0.5s ease-out' }} />
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md rounded-lg pointer-events-none">
+              <div className="animate-spin rounded-full h-14 w-14 border-t-4 border-b-4 border-emerald-400 mb-6 shadow-lg shadow-emerald-500/20"></div>
+              <p className="text-white font-black text-2xl tracking-wide mb-2 text-center px-4 animate-pulse uppercase drop-shadow-md">
+                ¡No mueva el celular!
+              </p>
+              <p className="text-emerald-100/90 font-medium text-sm text-center px-4 animate-pulse">
+                Procesando imagen con IA...
+              </p>
+            </div>
+          )}
+          {isCapturing && (
+            <div className="absolute inset-0 bg-white z-20 rounded-lg shadow-[0_0_50px_rgba(255,255,255,1)] pointer-events-none" style={{ animation: 'flash 0.5s ease-out' }} />
           )}
 
         </div>
