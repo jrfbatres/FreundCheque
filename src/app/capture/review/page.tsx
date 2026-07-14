@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppStore } from '@/store';
+import { useAppStore } from '@/store/useAppStore';
 import { CheckCircle2, X } from 'lucide-react';
 import Image from 'next/image';
 
