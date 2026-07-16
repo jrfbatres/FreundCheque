@@ -1,10 +1,29 @@
 'use client';
-import { useAppStore } from '@/store/useAppStore';
+import { useRouter } from 'next/navigation';
+import { useAppStore, ScannedCheck } from '@/store/useAppStore';
 import { CheckCircle2, Clock, Check, XCircle, HelpCircle, Moon, Sun, ShieldAlert } from 'lucide-react';
 import Image from 'next/image';
 
 export default function HistoryPage() {
+  const router = useRouter();
   const { theme, toggleTheme, scannedChecks } = useAppStore();
+
+  const handleCheckClick = (check: ScannedCheck) => {
+    const summaryData = {
+      fecha: check.date,
+      monto: parseFloat(check.amount.replace(/[^0-9.]/g, '')) || 0,
+      montoLetras: check.montoLetras || '',
+      banco: check.banco || '',
+      cuenta: check.cuenta || '',
+      numeroSerie: check.numCheque,
+      emisor: check.emitter,
+      beneficiario: check.beneficiario || '',
+      lineaMICR: check.lineaMICR || '',
+      cliente: check.cliente || null
+    };
+    sessionStorage.setItem('freund_cheque_summary', JSON.stringify(summaryData));
+    router.push('/capture/summary');
+  };
 
   const getStatusStyleAndIcon = (status: string) => {
     switch (status) {
@@ -78,7 +97,8 @@ export default function HistoryPage() {
           return (
             <div 
               key={check.id}
-              className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-850 p-4 rounded-2xl flex items-center justify-between shadow-sm hover:scale-[1.01] transition-all"
+              onClick={() => handleCheckClick(check)}
+              className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-850 p-4 rounded-2xl flex items-center justify-between shadow-sm hover:scale-[1.01] hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-all cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${bg}`}>

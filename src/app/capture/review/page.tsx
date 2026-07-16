@@ -22,7 +22,13 @@ export default function ReviewCapture() {
       date: fecha,
       status: 'Validado',
       numCheque: numeroSerie || 'CH-XXXX',
-      icon: 'check_circle'
+      icon: 'check_circle',
+      beneficiario: beneficiario || '',
+      banco: banco || '',
+      cuenta: cuenta || '',
+      lineaMICR: lineaMICR || '',
+      cliente: selectedClient,
+      montoLetras: montoLetras || ''
     });
 
     // Save summary data to sessionStorage

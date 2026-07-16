@@ -16,6 +16,12 @@ export interface ScannedCheck {
   status: 'Validado' | 'En tránsito' | 'Liquidado' | 'Rechazado';
   numCheque: string;
   icon: string;
+  beneficiario?: string;
+  banco?: string;
+  cuenta?: string;
+  lineaMICR?: string;
+  cliente?: Client | null;
+  montoLetras?: string;
 }
 
 interface AppState {
