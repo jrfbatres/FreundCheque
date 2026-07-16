@@ -34,6 +34,10 @@ interface AppState {
   setSelectedClient: (client: Client | null) => void;
   scannedChecks: ScannedCheck[];
   addScannedCheck: (check: ScannedCheck) => void;
+  azureApiKey: string;
+  setAzureApiKey: (key: string) => void;
+  azureEndpoint: string;
+  setAzureEndpoint: (endpoint: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -54,13 +58,19 @@ export const useAppStore = create<AppState>()(
       setSelectedClient: (client) => set({ selectedClient: client }),
       scannedChecks: [],
       addScannedCheck: (check) => set((state) => ({ scannedChecks: [check, ...state.scannedChecks] })),
+      azureApiKey: '',
+      setAzureApiKey: (key) => set({ azureApiKey: key }),
+      azureEndpoint: '',
+      setAzureEndpoint: (endpoint) => set({ azureEndpoint: endpoint }),
     }),
     {
       name: 'freund-cheque-store',
       partialize: (state) => ({ 
         webhookUrl: state.webhookUrl, 
         theme: state.theme, 
-        scannedChecks: state.scannedChecks 
+        scannedChecks: state.scannedChecks,
+        azureApiKey: state.azureApiKey,
+        azureEndpoint: state.azureEndpoint
       }),
     }
   )

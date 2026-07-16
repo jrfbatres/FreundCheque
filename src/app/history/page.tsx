@@ -1,39 +1,10 @@
 'use client';
-import { useState } from 'react';
-import { useAppStore, ScannedCheck } from '@/store/useAppStore';
-import { CheckCircle2, Clock, Check, XCircle, Search, HelpCircle, Moon, Sun, ShieldAlert } from 'lucide-react';
+import { useAppStore } from '@/store/useAppStore';
+import { CheckCircle2, Clock, Check, XCircle, HelpCircle, Moon, Sun, ShieldAlert } from 'lucide-react';
 import Image from 'next/image';
-
-const INITIAL_MOCK_CHECKS: Record<string, ScannedCheck[]> = {
-  current: [
-    { id: 'mock-1', emitter: 'Corporativo Global S.A.', amount: '$1,250.00', date: '24 Nov, 2026', status: 'Validado', numCheque: 'CH-9921', icon: 'check_circle' },
-    { id: 'mock-2', emitter: 'Ferretería El Sol', amount: '$845.30', date: '22 Nov, 2026', status: 'En tránsito', numCheque: 'CH-8842', icon: 'payments' },
-    { id: 'mock-3', emitter: 'Inversiones Atlas', amount: '$2,100.00', date: '20 Nov, 2026', status: 'Liquidado', numCheque: 'CH-7710', icon: 'verified' },
-    { id: 'mock-4', emitter: 'Distribuidora Norte', amount: '$412.00', date: '20 Nov, 2026', status: 'Validado', numCheque: 'CH-3329', icon: 'check_circle' }
-  ],
-  prev1: [
-    { id: 'mock-5', emitter: 'Supermercados Freund', amount: '$3,200.00', date: '18 Nov, 2026', status: 'Validado', numCheque: 'CH-1122', icon: 'check_circle' },
-    { id: 'mock-6', emitter: 'Logística Express', amount: '$120.00', date: '15 Nov, 2026', status: 'Liquidado', numCheque: 'CH-1123', icon: 'verified' }
-  ],
-  prev2: [
-    { id: 'mock-7', emitter: 'Manufactura Industrial', amount: '$9,000.00', date: '09 Nov, 2026', status: 'Validado', numCheque: 'CH-0051', icon: 'check_circle' },
-    { id: 'mock-8', emitter: 'Taller Hermanos', amount: '$50.00', date: '07 Nov, 2026', status: 'Rechazado', numCheque: 'CH-0052', icon: 'error' }
-  ]
-};
 
 export default function HistoryPage() {
   const { theme, toggleTheme, scannedChecks } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'current' | 'prev1' | 'prev2'>('current');
-
-  // Merge dynamic scannedChecks into the current week tab
-  const getChecksForTab = () => {
-    if (activeTab === 'current') {
-      return [...scannedChecks, ...INITIAL_MOCK_CHECKS.current];
-    }
-    return INITIAL_MOCK_CHECKS[activeTab];
-  };
-
-  const currentList = getChecksForTab();
 
   const getStatusStyleAndIcon = (status: string) => {
     switch (status) {
@@ -84,67 +55,25 @@ export default function HistoryPage() {
         <button 
           onClick={toggleTheme}
           className="p-2.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:scale-105 active:scale-95 transition-all shadow-sm"
+          aria-label="Toggle theme"
         >
           {theme === 'light' ? <Moon className="w-5 h-5 text-slate-800" /> : <Sun className="w-5 h-5 text-amber-400" />}
         </button>
       </header>
 
       {/* Screen Title */}
-      <section className="mb-6">
+      <section className="mb-8">
         <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
           Historial de Cheques
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-normal">
-          Revisa tus depósitos recientes y estados de validación automática.
+          Cheques escaneados y validados en tiempo real mediante la aplicación.
         </p>
-      </section>
-
-      {/* Weekly Filter Selector */}
-      <section className="mb-6 overflow-hidden">
-        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-          
-          <button 
-            onClick={() => setActiveTab('current')}
-            className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-left transition-all ${
-              activeTab === 'current'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-850'
-            }`}
-          >
-            <span className="block text-[8px] font-bold tracking-wider uppercase opacity-85">Esta Semana</span>
-            <span className="block text-xs font-bold whitespace-nowrap mt-0.5">20 - 26 Nov</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('prev1')}
-            className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-left transition-all ${
-              activeTab === 'prev1'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-850'
-            }`}
-          >
-            <span className="block text-[8px] font-bold tracking-wider uppercase opacity-85">Anterior</span>
-            <span className="block text-xs font-bold whitespace-nowrap mt-0.5">13 - 19 Nov</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('prev2')}
-            className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-left transition-all ${
-              activeTab === 'prev2'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-850'
-            }`}
-          >
-            <span className="block text-[8px] font-bold tracking-wider uppercase opacity-85">Hace 2 Semanas</span>
-            <span className="block text-xs font-bold whitespace-nowrap mt-0.5">06 - 12 Nov</span>
-          </button>
-
-        </div>
       </section>
 
       {/* Transactions List */}
       <section className="flex-1 space-y-3.5">
-        {currentList.map((check) => {
+        {scannedChecks.map((check) => {
           const { bg, icon } = getStatusStyleAndIcon(check.status);
           return (
             <div 
@@ -176,11 +105,12 @@ export default function HistoryPage() {
           );
         })}
 
-        {currentList.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center opacity-65">
-            <ShieldAlert className="w-12 h-12 text-slate-300 mb-3" />
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              No se encontraron cheques para este período.
+        {scannedChecks.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <ShieldAlert className="w-14 h-14 text-slate-300 dark:text-slate-650 mb-4" />
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">No hay cheques registrados</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
+              Los cheques que escanees y valides en la aplicación aparecerán en esta lista de forma automática.
             </p>
           </div>
         )}

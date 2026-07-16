@@ -5,13 +5,16 @@ const p1 = "6ZpgiO0xjdS10GVngQGUDnRK";
 const p2 = "BsKayGFdZtws8mB9fLbJNA";
 const p3 = "46HJFOJQQJ99BBACHYHv6X";
 const p4 = "J3w3AAAAACOGoE0u";
-const apiKey = p1 + p2 + p3 + p4;
+const defaultApiKey = p1 + p2 + p3 + p4;
 
-const endpoint = "https://ais-chatbotfreund-test-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-12-01-preview";
+const defaultEndpoint = "https://ais-chatbotfreund-test-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-12-01-preview";
 
 export async function POST(req: NextRequest) {
   try {
-    const { imageBase64 } = await req.json();
+    const { imageBase64, azureApiKey, azureEndpoint } = await req.json();
+
+    const apiKey = azureApiKey || defaultApiKey;
+    const endpoint = azureEndpoint || defaultEndpoint;
 
     if (!imageBase64) {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 });

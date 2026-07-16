@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 export default function ReviewCapture() {
   const router = useRouter();
-  const { frontImageBase64, theme, toggleTheme, addScannedCheck, selectedClient } = useAppStore();
+  const { frontImageBase64, theme, toggleTheme, addScannedCheck, selectedClient, azureApiKey, azureEndpoint } = useAppStore();
 
   const handleFinalize = () => {
     if (!allValid) return;
@@ -148,7 +148,11 @@ export default function ReviewCapture() {
         const res = await fetch('/api/extract', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: frontImageBase64 })
+          body: JSON.stringify({ 
+            imageBase64: frontImageBase64,
+            azureApiKey,
+            azureEndpoint
+          })
         });
         
         const json = await res.json();
