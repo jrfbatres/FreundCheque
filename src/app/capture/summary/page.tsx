@@ -31,6 +31,7 @@ export default function SummaryCapture() {
   
   const [emailPrincipal, setEmailPrincipal] = useState('a.ramirez@empresa.com');
   const [emailSecundario, setEmailSecundario] = useState('');
+  const [whatsappPhone, setWhatsappPhone] = useState('');
   const [emailSent, setEmailSent] = useState(false);
 
   useEffect(() => {
@@ -100,7 +101,10 @@ Este es un comprobante digital generado automáticamente. Gracias por su prefere
 
 _Comprobante digital generado por Freund Cheque._`;
 
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+    const cleanPhone = whatsappPhone.replace(/[^0-9]/g, '');
+    const url = cleanPhone 
+      ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(messageText)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
     window.open(url, '_blank');
   };
 
@@ -281,6 +285,22 @@ _Comprobante digital generado por Freund Cheque._`;
                   placeholder="contabilidad@empresa.com"
                   value={emailSecundario} 
                   onChange={(e) => setEmailSecundario(e.target.value)}
+                  className="bg-transparent border-none focus:ring-0 w-full text-xs text-slate-900 dark:text-white outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                WhatsApp (Número de Teléfono)
+              </label>
+              <div className="flex items-center bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-750 rounded-lg py-2 px-3 shadow-inner">
+                <MessageCircle className="w-4 h-4 text-slate-400 mr-2" />
+                <input 
+                  type="tel" 
+                  placeholder="e.g. 50370001234"
+                  value={whatsappPhone} 
+                  onChange={(e) => setWhatsappPhone(e.target.value)}
                   className="bg-transparent border-none focus:ring-0 w-full text-xs text-slate-900 dark:text-white outline-none"
                 />
               </div>
