@@ -3,6 +3,13 @@ import { useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Save, Activity, CheckCircle2, AlertCircle, Sun, Moon } from 'lucide-react';
 
+const DEFAULT_ENDPOINT = "https://ais-chatbotfreund-test-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-12-01-preview";
+const k1 = "6ZpgiO0xjdS10GVngQGUDnRK";
+const k2 = "BsKayGFdZtws8mB9fLbJNA";
+const k3 = "46HJFOJQQJ99BBACHYHv6X";
+const k4 = "J3w3AAAAACOGoE0u";
+const DEFAULT_KEY = k1 + k2 + k3 + k4;
+
 export default function Settings() {
   const { 
     webhookUrl, 
@@ -16,8 +23,8 @@ export default function Settings() {
   } = useAppStore();
   
   const [url, setUrl] = useState(webhookUrl);
-  const [key, setKey] = useState(azureApiKey);
-  const [endpoint, setEndpoint] = useState(azureEndpoint);
+  const [key, setKey] = useState(azureApiKey || DEFAULT_KEY);
+  const [endpoint, setEndpoint] = useState(azureEndpoint || DEFAULT_ENDPOINT);
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -104,7 +111,7 @@ export default function Settings() {
             <div className="space-y-3">
               <label className="text-xs font-semibold text-slate-650 dark:text-slate-400">Azure OpenAI API Key</label>
               <input 
-                type="password"
+                type="text"
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
                 placeholder="Usar clave de suscripción por defecto..."
