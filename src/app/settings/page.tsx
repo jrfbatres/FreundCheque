@@ -18,6 +18,16 @@ export default function Settings() {
     setAzureApiKey, 
     azureEndpoint, 
     setAzureEndpoint,
+    smtpHost,
+    setSmtpHost,
+    smtpPort,
+    setSmtpPort,
+    smtpUser,
+    setSmtpUser,
+    smtpPass,
+    setSmtpPass,
+    smtpFrom,
+    setSmtpFrom,
     theme,
     toggleTheme
   } = useAppStore();
@@ -25,6 +35,13 @@ export default function Settings() {
   const [url, setUrl] = useState(webhookUrl);
   const [key, setKey] = useState(azureApiKey || DEFAULT_KEY);
   const [endpoint, setEndpoint] = useState(azureEndpoint || DEFAULT_ENDPOINT);
+  
+  const [sHost, setSHost] = useState(smtpHost);
+  const [sPort, setSPort] = useState(smtpPort);
+  const [sUser, setSUser] = useState(smtpUser);
+  const [sPass, setSPass] = useState(smtpPass);
+  const [sFrom, setSFrom] = useState(smtpFrom);
+
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -32,6 +49,11 @@ export default function Settings() {
     setWebhookUrl(url);
     setAzureApiKey(key);
     setAzureEndpoint(endpoint);
+    setSmtpHost(sHost);
+    setSmtpPort(sPort);
+    setSmtpUser(sUser);
+    setSmtpPass(sPass);
+    setSmtpFrom(sFrom);
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
   };
@@ -120,21 +142,82 @@ export default function Settings() {
             </div>
           </div>
 
+          {/* SMTP Settings Section */}
+          <div className="border-t border-slate-200 dark:border-slate-850 pt-6 space-y-4">
+            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Configuración SMTP (Correo Electrónico)</h2>
+            
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-slate-650 dark:text-slate-400">SMTP Host</label>
+              <input 
+                type="text"
+                value={sHost}
+                onChange={(e) => setSHost(e.target.value)}
+                placeholder="e.g. smtp.gmail.com o smtp.mailgun.org"
+                className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-xs"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-1 space-y-3">
+                <label className="text-xs font-semibold text-slate-650 dark:text-slate-400">Puerto</label>
+                <input 
+                  type="text"
+                  value={sPort}
+                  onChange={(e) => setSPort(e.target.value)}
+                  placeholder="587 o 465"
+                  className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-xs text-center"
+                />
+              </div>
+              <div className="col-span-2 space-y-3">
+                <label className="text-xs font-semibold text-slate-650 dark:text-slate-400">Nombre del Remitente</label>
+                <input 
+                  type="text"
+                  value={sFrom}
+                  onChange={(e) => setSFrom(e.target.value)}
+                  placeholder='Freund Cheque <correo@empresa.com>'
+                  className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-slate-650 dark:text-slate-400">Usuario SMTP (Email)</label>
+              <input 
+                type="email"
+                value={sUser}
+                onChange={(e) => setSUser(e.target.value)}
+                placeholder="correo@empresa.com"
+                className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-xs"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-slate-650 dark:text-slate-400">Contraseña SMTP</label>
+              <input 
+                type="password"
+                value={sPass}
+                onChange={(e) => setSPass(e.target.value)}
+                placeholder="••••••••••••••••••••••••"
+                className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-xs"
+              />
+            </div>
+          </div>
+
           <div className="flex gap-4 pt-4">
             <button 
               onClick={handleTest}
               disabled={!url || testStatus === 'testing'}
-              className="flex-1 flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-4 font-medium text-slate-700 dark:text-slate-200 transition-all disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-4 font-medium text-slate-700 dark:text-slate-200 transition-all disabled:opacity-50 text-xs"
             >
-              <Activity className="w-5 h-5" />
+              <Activity className="w-4 h-4" />
               Probar Webhook
             </button>
 
             <button 
               onClick={handleSave}
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-4 font-medium transition-all shadow-md shadow-blue-600/20 animate-none hover:scale-[1.02]"
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-4 font-bold transition-all shadow-md shadow-blue-600/20 hover:scale-[1.02]"
             >
-              <Save className="w-5 h-5" />
+              <Save className="w-4 h-4" />
               Guardar
             </button>
           </div>

@@ -26,7 +26,16 @@ interface SummaryData {
 
 export default function SummaryCapture() {
   const router = useRouter();
-  const { theme, toggleTheme, clearCaptureData } = useAppStore();
+  const { 
+    theme, 
+    toggleTheme, 
+    clearCaptureData,
+    smtpHost,
+    smtpPort,
+    smtpUser,
+    smtpPass,
+    smtpFrom
+  } = useAppStore();
   const [data, setData] = useState<SummaryData | null>(null);
   
   const [emailPrincipal, setEmailPrincipal] = useState('a.ramirez@empresa.com');
@@ -55,11 +64,56 @@ export default function SummaryCapture() {
     }
   }, []);
 
-  const handleSendEmail = () => {
+  const handleSendEmail = async () => {
     if (!data) return;
     const recipients = [emailPrincipal, emailSecundario].filter(Boolean).join(',');
+
+    // Si tiene configuración SMTP configurada, enviamos el correo HTML presentable a través de la API del servidor
+    if (smtpHost && smtpUser && smtpPass) {
+      try {
+        setEmailSent(false);
+        const res = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipients,
+            smtpConfig: {
+              host: smtpHost,
+              port: smtpPort,
+              user: smtpUser,
+              pass: smtpPass,
+              from: smtpFrom
+            },
+            receiptData: {
+              fecha: data.fecha,
+              monto: data.monto,
+              montoLetras: data.montoLetras,
+              banco: data.banco,
+              cuenta: data.cuenta,
+              numeroSerie: data.numeroSerie,
+              emisor: data.emisor,
+              beneficiario: data.beneficiario,
+              lineaMICR: data.lineaMICR,
+              cliente: data.cliente
+            }
+          })
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Fallo en envío SMTP');
+        }
+
+        setEmailSent(true);
+        setTimeout(() => setEmailSent(false), 3000);
+        return;
+      } catch (err: any) {
+        console.warn("Envío directo SMTP falló, recurriendo a mailto:", err);
+      }
+    }
+
+    // Fallback: Mailto plano en caso de no tener configurado el SMTP o fallar la API
     const subject = encodeURIComponent('Recibo de Abono de Cheque - Freund');
-    
     const bodyText = `Estimado(a) Cliente,
 
 Le confirmamos el depósito de su cheque con los siguientes detalles:

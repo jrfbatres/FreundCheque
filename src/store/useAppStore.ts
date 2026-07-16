@@ -44,6 +44,16 @@ interface AppState {
   setAzureApiKey: (key: string) => void;
   azureEndpoint: string;
   setAzureEndpoint: (endpoint: string) => void;
+  smtpHost: string;
+  setSmtpHost: (host: string) => void;
+  smtpPort: string;
+  setSmtpPort: (port: string) => void;
+  smtpUser: string;
+  setSmtpUser: (user: string) => void;
+  smtpPass: string;
+  setSmtpPass: (pass: string) => void;
+  smtpFrom: string;
+  setSmtpFrom: (from: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -68,6 +78,16 @@ export const useAppStore = create<AppState>()(
       setAzureApiKey: (key) => set({ azureApiKey: key }),
       azureEndpoint: '',
       setAzureEndpoint: (endpoint) => set({ azureEndpoint: endpoint }),
+      smtpHost: '',
+      setSmtpHost: (host) => set({ smtpHost: host }),
+      smtpPort: '',
+      setSmtpPort: (port) => set({ smtpPort: port }),
+      smtpUser: '',
+      setSmtpUser: (user) => set({ smtpUser: user }),
+      smtpPass: '',
+      setSmtpPass: (pass) => set({ smtpPass: pass }),
+      smtpFrom: '',
+      setSmtpFrom: (from) => set({ smtpFrom: from }),
     }),
     {
       name: 'freund-cheque-store',
@@ -76,7 +96,12 @@ export const useAppStore = create<AppState>()(
         theme: state.theme, 
         scannedChecks: state.scannedChecks,
         azureApiKey: state.azureApiKey,
-        azureEndpoint: state.azureEndpoint
+        azureEndpoint: state.azureEndpoint,
+        smtpHost: state.smtpHost,
+        smtpPort: state.smtpPort,
+        smtpUser: state.smtpUser,
+        smtpPass: state.smtpPass,
+        smtpFrom: state.smtpFrom
       }),
     }
   )
