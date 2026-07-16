@@ -55,8 +55,53 @@ export default function SummaryCapture() {
   }, []);
 
   const handleSendEmail = () => {
+    if (!data) return;
+    const recipients = [emailPrincipal, emailSecundario].filter(Boolean).join(',');
+    const subject = encodeURIComponent('Recibo de Abono de Cheque - Freund');
+    
+    const bodyText = `Estimado(a) Cliente,
+
+Le confirmamos el depósito de su cheque con los siguientes detalles:
+
+Detalles del Depósito:
+----------------------------------------
+Cliente Emisor: ${data.cliente?.name || 'Cliente Desconocido'}
+ID Cliente: ${data.cliente?.id || 'N/A'}
+Monto Depositado: $${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+Monto en Letras: ${data.montoLetras}
+Banco: ${data.banco}
+Cuenta: ${data.cuenta}
+Número de Cheque: #${data.numeroSerie}
+Fecha: ${data.fecha}
+Línea MICR: ${data.lineaMICR}
+
+Este es un comprobante digital generado automáticamente. Gracias por su preferencia.`;
+
+    const body = encodeURIComponent(bodyText);
+    window.location.href = `mailto:${recipients}?subject=${subject}&body=${body}`;
+    
     setEmailSent(true);
     setTimeout(() => setEmailSent(false), 3000);
+  };
+
+  const handleSendWhatsApp = () => {
+    if (!data) return;
+    const messageText = `*Recibo de Abono de Cheque - Freund* ✅
+
+*Cliente:* ${data.cliente?.name || 'Cliente Desconocido'}
+*ID Cliente:* ${data.cliente?.id || 'N/A'}
+*Monto:* $${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+*Monto en Letras:* _${data.montoLetras}_
+*Banco:* ${data.banco}
+*Cuenta:* ${data.cuenta}
+*Cheque:* #${data.numeroSerie}
+*Fecha:* ${data.fecha}
+*Línea MICR:* \`${data.lineaMICR}\`
+
+_Comprobante digital generado por Freund Cheque._`;
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+    window.open(url, '_blank');
   };
 
   const handleFinishFlow = () => {
@@ -253,13 +298,13 @@ export default function SummaryCapture() {
             Enviar recibo por Email
           </button>
 
-          <Link 
-            href="/capture/whatsapp"
+          <button 
+            onClick={handleSendWhatsApp}
             className="w-full h-12 border-2 border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-755 text-slate-800 dark:text-slate-200 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-98"
           >
             <MessageCircle className="w-4 h-4 text-emerald-500" />
             Enviar recibo por WhatsApp
-          </Link>
+          </button>
 
           {emailSent && (
             <div className="p-3 bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-500 text-emerald-800 dark:text-emerald-400 rounded-xl flex items-center justify-center gap-2 animate-in slide-in-from-bottom-2 text-xs font-semibold">
