@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 export default function ReviewCapture() {
   const router = useRouter();
-  const { frontImageBase64, theme, toggleTheme, addScannedCheck, selectedClient, azureApiKey, azureEndpoint } = useAppStore();
+  const { frontImageBase64, theme, toggleTheme, addScannedCheck, selectedClient, azureApiKey, azureEndpoint, scannedChecks } = useAppStore();
 
   const handleFinalize = () => {
     if (!allValid) return;
@@ -122,7 +122,12 @@ export default function ReviewCapture() {
     }
   }, [fecha]);
 
-  const allValid = vMonto && vEmisor && vBeneficiario && vBanco && vCuenta && vNumeroSerie && vMontosCoinciden && isFechaValid && esCheque === true;
+  // Validación de duplicado: no debe haberse escaneado antes (mismo número de cheque y banco)
+  const isDuplicate = scannedChecks.some(
+    (c) => c.numCheque === numeroSerie && c.banco?.toLowerCase() === banco?.toLowerCase()
+  );
+
+  const allValid = vMonto && vEmisor && vBeneficiario && vBanco && vCuenta && vNumeroSerie && vMontosCoinciden && isFechaValid && esCheque === true && !isDuplicate;
 
   const finalData = {
     fecha,
@@ -293,6 +298,13 @@ export default function ReviewCapture() {
           {errorMsg && (
             <div className="bg-red-500/20 border border-red-500 text-red-100 p-3 rounded-lg text-sm mb-2 text-center font-semibold">
               {errorMsg}
+            </div>
+          )}
+
+          {isDuplicate && (
+            <div className="bg-amber-500/20 border border-amber-500 text-amber-900 dark:text-amber-100 p-3 rounded-lg text-sm mb-2 text-center font-semibold flex items-center justify-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>Este cheque ya fue escaneado anteriormente (Cheque #{numeroSerie} de {banco}).</span>
             </div>
           )}
 
