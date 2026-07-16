@@ -40,7 +40,7 @@ export default function ReviewCapture() {
     };
     sessionStorage.setItem('freund_cheque_summary', JSON.stringify(summaryData));
     
-    router.push('/capture/summary');
+    router.push('/capture/search-client');
   };
 
   const [isLoading, setIsLoading] = useState(true);
