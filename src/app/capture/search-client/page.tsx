@@ -27,7 +27,16 @@ export default function SearchClient() {
   const handleContinue = () => {
     if (localSelection) {
       setSelectedClient(localSelection);
-      router.push('/capture/front');
+      
+      // Update sessionStorage with selected client details for downstream pages like summary and whatsapp preview
+      const cached = sessionStorage.getItem('freund_cheque_summary');
+      if (cached) {
+        const summaryData = JSON.parse(cached);
+        summaryData.cliente = localSelection;
+        sessionStorage.setItem('freund_cheque_summary', JSON.stringify(summaryData));
+      }
+      
+      router.push('/capture/summary');
     }
   };
 
