@@ -9,7 +9,7 @@ import Image from 'next/image';
 
 export default function CaptureFront() {
   const router = useRouter();
-  const { setFrontImageBase64, theme, toggleTheme } = useAppStore();
+  const { setFrontImageBase64, theme, toggleTheme, selectedClient } = useAppStore();
   const [isCapturing, setIsCapturing] = useState(false);
   
   const [validations, setValidations] = useState({
@@ -116,7 +116,9 @@ export default function CaptureFront() {
             height={40}
             className="object-contain"
           />
-          <h1 className="text-white text-xl font-bold drop-shadow-md hidden sm:block">Escanear Cheque</h1>
+          <h1 className="text-white text-sm sm:text-base font-bold drop-shadow-md">
+            {selectedClient ? `Abonar a: ${selectedClient.name}` : 'Escanear Cheque'}
+          </h1>
         </div>
         
         <div className="flex items-center gap-3">

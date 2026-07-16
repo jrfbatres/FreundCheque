@@ -9,7 +9,39 @@ import Link from 'next/link';
 
 export default function ReviewCapture() {
   const router = useRouter();
-  const { frontImageBase64, theme } = useAppStore();
+  const { frontImageBase64, theme, addScannedCheck, selectedClient } = useAppStore();
+
+  const handleFinalize = () => {
+    if (!allValid) return;
+    
+    // Add to scanned checks
+    addScannedCheck({
+      id: Math.random().toString(36).substring(2, 11),
+      emitter: emisor || selectedClient?.name || 'Cliente Desconocido',
+      amount: `$${parseFloat(monto).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      date: fecha,
+      status: 'Validado',
+      numCheque: numeroSerie || 'CH-XXXX',
+      icon: 'check_circle'
+    });
+
+    // Save summary data to sessionStorage
+    const summaryData = {
+      fecha,
+      monto: parseFloat(monto),
+      montoLetras,
+      banco,
+      cuenta,
+      numeroSerie,
+      emisor,
+      beneficiario,
+      lineaMICR,
+      cliente: selectedClient
+    };
+    sessionStorage.setItem('freund_cheque_summary', JSON.stringify(summaryData));
+    
+    router.push('/capture/summary');
+  };
 
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
@@ -348,7 +380,7 @@ export default function ReviewCapture() {
         </Link>
         
         <button 
-          onClick={() => allValid && setIsFinished(true)}
+          onClick={handleFinalize}
           disabled={!allValid}
           className={`flex-1 py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${
             allValid 
