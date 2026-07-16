@@ -122,12 +122,7 @@ export default function ReviewCapture() {
     }
   }, [fecha]);
 
-  // Validación de duplicado: no debe haberse escaneado antes (mismo número de cheque y banco)
-  const isDuplicate = scannedChecks.some(
-    (c) => c.numCheque === numeroSerie && c.banco?.toLowerCase() === banco?.toLowerCase()
-  );
-
-  const allValid = vMonto && vEmisor && vBeneficiario && vBanco && vCuenta && vNumeroSerie && vMontosCoinciden && isFechaValid && esCheque === true && !isDuplicate;
+  const allValid = vMonto && vEmisor && vBeneficiario && vBanco && vCuenta && vNumeroSerie && vMontosCoinciden && isFechaValid && esCheque === true;
 
   const finalData = {
     fecha,
@@ -301,12 +296,7 @@ export default function ReviewCapture() {
             </div>
           )}
 
-          {isDuplicate && (
-            <div className="bg-amber-500/20 border border-amber-500 text-amber-900 dark:text-amber-100 p-3 rounded-lg text-sm mb-2 text-center font-semibold flex items-center justify-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
-              <span>Este cheque ya fue escaneado anteriormente (Cheque #{numeroSerie} de {banco}).</span>
-            </div>
-          )}
+
 
           {/* Screen Title */}
           <div>
