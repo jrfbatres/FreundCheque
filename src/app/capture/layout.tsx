@@ -27,8 +27,9 @@ export default function CaptureLayout({ children }: { children: React.ReactNode 
 
   if (!mounted) return null;
 
-  // No requerir modo horizontal si estamos en la pantalla de revisión
-  if (isPortrait && pathname !== '/capture/review') {
+  const isCameraPage = pathname === '/capture/front' || pathname === '/capture/back';
+
+  if (isPortrait && isCameraPage) {
     return (
       <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 text-white p-6 text-center">
         <div className="mb-8 animate-spin" style={{ animationDuration: '3s' }}>
@@ -43,7 +44,7 @@ export default function CaptureLayout({ children }: { children: React.ReactNode 
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black overflow-hidden">
+    <div className={`fixed inset-0 z-50 ${isCameraPage ? 'bg-black overflow-hidden' : 'overflow-y-auto'}`}>
       {children}
     </div>
   );
