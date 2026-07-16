@@ -6,8 +6,12 @@ import { usePathname } from 'next/navigation';
 export default function BottomNav() {
   const pathname = usePathname();
 
-  // Hide BottomNav on capture screens except search-client
-  if (pathname.includes('/capture') && !pathname.includes('/capture/search-client')) return null;
+  // Hide BottomNav on camera and simulated screens
+  if (
+    pathname === '/capture/front' || 
+    pathname === '/capture/back' || 
+    pathname === '/capture/whatsapp'
+  ) return null;
 
   return (
     <div className="fixed bottom-0 left-0 w-full h-16 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-around items-center z-50 transition-colors">

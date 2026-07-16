@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
-import { CheckCircle2, XCircle, X, Check } from 'lucide-react';
+import { CheckCircle2, XCircle, X, Check, User, Coins, Landmark, ArrowRight, Camera, AlertCircle, Sun, Moon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -247,20 +247,34 @@ export default function ReviewCapture() {
   }
 
   return (
-    <div className={`h-[100dvh] w-full ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} flex flex-col overflow-hidden`}>
+    <div className={`min-h-screen w-full ${theme === 'dark' ? 'bg-slate-950 text-slate-150' : 'bg-slate-50 text-slate-900'} flex flex-col pb-20`}>
       
       {/* Header */}
-      <header className={`shrink-0 p-3 flex items-center justify-between border-b ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
-        <Image src={theme === 'dark' ? '/logoFreundOscuro3.png' : '/logoFreund2.png'} alt="Freund Logo" width={100} height={30} className="object-contain" />
-        <h1 className="text-lg font-bold">Validación Inteligente</h1>
+      <header className="shrink-0 px-6 py-4 flex items-center justify-between">
+        <div className="relative w-24 h-8">
+          <Image 
+            src={theme === 'dark' ? '/logoFreundOscuro3.png' : '/logoFreund2.png'} 
+            alt="Freund Logo" 
+            fill
+            sizes="96px"
+            className="object-contain"
+          />
+        </div>
+        <button 
+          onClick={toggleTheme}
+          aria-label="Toggle light/dark mode"
+          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+        >
+          {theme === 'light' ? <Moon className="w-5 h-5 text-slate-800" /> : <Sun className="w-5 h-5 text-amber-400" />}
+        </button>
       </header>
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto w-full p-4">
-        <div className="max-w-xl mx-auto flex flex-col gap-4 relative">
+      <main className="flex-1 w-full px-6 max-w-md mx-auto">
+        <div className="flex flex-col gap-6 relative">
           
           {isLoading && (
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-sm rounded-xl border border-slate-700">
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm rounded-xl">
               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500 mb-4"></div>
               <p className="text-white font-bold animate-pulse text-lg">Analizando campos...</p>
             </div>
@@ -272,125 +286,216 @@ export default function ReviewCapture() {
             </div>
           )}
 
-          {/* Imagen Escaneada */}
-          <div className="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700 shrink-0">
+          {/* Screen Title */}
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Verificación de Datos</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+              Confirme que la información extraída del cheque sea correcta antes de continuar.
+            </p>
+          </div>
+
+          {/* Scanned Check Image (Always Shown) */}
+          <div className="bg-slate-850 dark:bg-slate-900 rounded-2xl overflow-hidden shadow-md border border-slate-200 dark:border-slate-800 shrink-0">
             <div className="relative w-full aspect-[21/9] bg-black">
               <img src={frontImageBase64} alt="Cheque Escaneado" className="absolute inset-0 w-full h-full object-contain" />
             </div>
             
-            {/* MICR debajo de la imagen */}
+            {/* MICR underneath check image */}
             {!isLoading && lineaMICR && (
-              <div className="bg-slate-900 text-emerald-400 p-3 text-center border-t border-slate-700">
-                <span className="text-xs uppercase text-slate-400 block mb-1">Línea MICR Extraída</span>
-                <span className="font-mono text-sm tracking-widest">{lineaMICR}</span>
+              <div className="bg-slate-900 text-emerald-400 p-3 text-center border-t border-slate-800">
+                <span className="text-[9px] uppercase tracking-widest text-slate-400 block mb-1">Línea MICR Extraída</span>
+                <span className="font-mono text-xs tracking-wider">{lineaMICR}</span>
               </div>
             )}
           </div>
 
-          <p className="text-sm opacity-80 text-center font-medium mt-2">
-            Verifique y corrija los datos si es necesario.
-          </p>
-
-          {/* Formulario */}
-          <div className={`rounded-xl p-4 flex flex-col gap-4 shadow-inner ${theme === 'dark' ? 'bg-slate-900/50 border border-slate-800' : 'bg-white border border-slate-200'}`}>
+          {/* Form Content - Cards */}
+          <div className="flex flex-col gap-4">
             
-            {/* Emisor */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Emisor</label>
-              <div className="flex items-center gap-2">
-                <StatusIcon valid={vEmisor} />
-                <input type="text" value={emisor} onChange={(e) => setEmisor(e.target.value)} className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
-              </div>
-            </div>
-
-            {/* Beneficiario */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Beneficiario</label>
-              <div className="flex items-center gap-2">
-                <StatusIcon valid={vBeneficiario} />
-                <input type="text" value={beneficiario} onChange={(e) => setBeneficiario(e.target.value)} className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
-              </div>
-            </div>
-
-            {/* Monto (Numérico) */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Monto Numérico</label>
-              <div className="flex items-center gap-2">
-                <StatusIcon valid={vMonto} />
-                <input type="text" value={monto} onChange={(e) => setMonto(e.target.value)} className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
-              </div>
-            </div>
-
-            {/* Monto en Letras */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Monto en Letras (Coincide: {vMontosCoinciden ? 'Sí' : 'No'})</label>
-              <div className="flex items-center gap-2">
-                <StatusIcon valid={vMontosCoinciden} />
-                <input type="text" value={montoLetras} readOnly className={`flex-1 p-2 rounded-lg text-sm border opacity-70 cursor-not-allowed ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`} />
-              </div>
-              {!vMontosCoinciden && <span className="text-[10px] text-red-500 font-bold">* El monto numérico y letras difieren.</span>}
-            </div>
-
-            {/* Fecha */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Fecha (DD/MM/YYYY)</label>
-              <div className="flex items-center gap-2">
-                <StatusIcon valid={isFechaValid} />
-                <input type="text" value={fecha} onChange={(e) => setFecha(e.target.value)} className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
-              </div>
-              {!isFechaValid && fechaErrorMsg && <span className="text-[10px] text-red-500 font-bold">* {fechaErrorMsg}</span>}
-            </div>
-
-            {/* Banco e Información */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase tracking-wider opacity-70">Banco</label>
+            {/* 1. PARTICIPANTES Card */}
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-850 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-850">
                 <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                  <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">Participantes</span>
+                </div>
+              </div>
+
+              {/* Emisor */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-450 uppercase font-semibold">Emisor</span>
+                  <StatusIcon valid={vEmisor} />
+                </div>
+                <input 
+                  type="text" 
+                  value={emisor} 
+                  onChange={(e) => setEmisor(e.target.value)} 
+                  className="w-full bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus:border-blue-500 dark:focus:border-blue-550 py-1 font-bold text-slate-900 dark:text-white text-base outline-none focus:ring-0 transition-all p-0" 
+                />
+              </div>
+
+              {/* Beneficiario */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-450 uppercase font-semibold">Beneficiario</span>
+                  <StatusIcon valid={vBeneficiario} />
+                </div>
+                <input 
+                  type="text" 
+                  value={beneficiario} 
+                  onChange={(e) => setBeneficiario(e.target.value)} 
+                  className="w-full bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus:border-blue-500 dark:focus:border-blue-550 py-1 font-bold text-slate-900 dark:text-white text-base outline-none focus:ring-0 transition-all p-0" 
+                />
+              </div>
+            </div>
+
+            {/* 2. MONTOS Y FECHA Card */}
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-850 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-850">
+                <div className="flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                  <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">Montos y Fecha</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Monto Numérico */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-450 uppercase font-semibold">Monto en números</span>
+                    <StatusIcon valid={vMonto} />
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-extrabold text-xl mr-0.5">$</span>
+                    <input 
+                      type="text" 
+                      value={monto} 
+                      onChange={(e) => setMonto(e.target.value)} 
+                      className="w-full bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus:border-blue-500 dark:focus:border-blue-550 py-1 font-extrabold text-emerald-600 dark:text-emerald-400 text-xl outline-none focus:ring-0 transition-all p-0" 
+                    />
+                  </div>
+                </div>
+
+                {/* Fecha */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-450 uppercase font-semibold">Fecha</span>
+                    <StatusIcon valid={isFechaValid} />
+                  </div>
+                  <input 
+                    type="text" 
+                    value={fecha} 
+                    onChange={(e) => setFecha(e.target.value)} 
+                    className="w-full bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus:border-blue-500 dark:focus:border-blue-550 py-1 font-bold text-slate-900 dark:text-white text-base outline-none focus:ring-0 transition-all p-0" 
+                  />
+                  {!isFechaValid && fechaErrorMsg && (
+                    <span className="text-[9px] text-red-500 font-bold block mt-0.5">* {fechaErrorMsg}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Monto en Letras */}
+              <div className="space-y-1 pt-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-450 uppercase font-semibold">Monto en letras</span>
+                  <StatusIcon valid={vMontosCoinciden} />
+                </div>
+                <input 
+                  type="text" 
+                  value={montoLetras} 
+                  readOnly 
+                  className="w-full bg-transparent border-b border-transparent py-1 font-semibold italic text-slate-700 dark:text-slate-350 text-xs outline-none focus:ring-0 p-0 cursor-default opacity-85" 
+                />
+                {!vMontosCoinciden && (
+                  <span className="text-[9px] text-red-500 font-bold block mt-0.5">* El monto numérico y letras difieren.</span>
+                )}
+              </div>
+            </div>
+
+            {/* 3. DATOS BANCARIOS Card */}
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-850 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-850">
+                <div className="flex items-center gap-2">
+                  <Landmark className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                  <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">Datos Bancarios</span>
+                </div>
+              </div>
+
+              {/* Banco */}
+              <div className="flex justify-between items-center py-1">
+                <div className="flex items-center gap-1.5">
                   <StatusIcon valid={vBanco} />
-                  <input type="text" value={banco} onChange={(e) => setBanco(e.target.value)} className={`w-full p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Nombre del banco</span>
                 </div>
+                <input 
+                  type="text" 
+                  value={banco} 
+                  onChange={(e) => setBanco(e.target.value)} 
+                  className="bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus:border-blue-500 dark:focus:border-blue-550 py-1 font-bold text-slate-900 dark:text-white text-sm outline-none focus:ring-0 p-0 text-right max-w-[160px]" 
+                />
               </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase tracking-wider opacity-70">Cuenta</label>
-                <div className="flex items-center gap-2">
+              {/* Cuenta */}
+              <div className="flex justify-between items-center py-1">
+                <div className="flex items-center gap-1.5">
                   <StatusIcon valid={vCuenta} />
-                  <input type="text" value={cuenta} onChange={(e) => setCuenta(e.target.value)} className={`w-full p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Cuenta</span>
+                </div>
+                <input 
+                  type="text" 
+                  value={cuenta} 
+                  onChange={(e) => setCuenta(e.target.value)} 
+                  className="bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus:border-blue-500 dark:focus:border-blue-550 py-1 font-mono text-slate-900 dark:text-white text-sm outline-none focus:ring-0 p-0 text-right max-w-[160px]" 
+                />
+              </div>
+
+              {/* Número de Cheque */}
+              <div className="flex justify-between items-center py-1">
+                <div className="flex items-center gap-1.5">
+                  <StatusIcon valid={vNumeroSerie} />
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Número de cheque</span>
+                </div>
+                <div className="flex items-center justify-end">
+                  <span className="text-slate-500 mr-0.5 font-mono text-sm">#</span>
+                  <input 
+                    type="text" 
+                    value={numeroSerie} 
+                    onChange={(e) => setNumeroSerie(e.target.value)} 
+                    className="bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus:border-blue-500 dark:focus:border-blue-550 py-1 font-mono font-bold text-slate-900 dark:text-white text-sm outline-none focus:ring-0 p-0 text-right max-w-[140px]" 
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Numero de Serie */}
-            <div className="flex flex-col gap-1 mt-2">
-              <label className="text-xs font-bold uppercase tracking-wider opacity-70">Número de Serie</label>
-              <div className="flex items-center gap-2">
-                <StatusIcon valid={vNumeroSerie} />
-                <input type="text" value={numeroSerie} onChange={(e) => setNumeroSerie(e.target.value)} className={`flex-1 p-2 rounded-lg text-sm border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-300'}`} />
-              </div>
-            </div>
-            
           </div>
+
+          {/* Action Buttons Stacked */}
+          <div className="flex flex-col gap-3 mt-4 pt-4">
+            <button 
+              onClick={handleFinalize}
+              disabled={!allValid}
+              className={`w-full h-12 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                allValid 
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md cursor-pointer hover:opacity-90' 
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-650 cursor-not-allowed opacity-50'
+              }`}
+            >
+              Continuar
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <button 
+              onClick={() => router.push('/capture/front')}
+              className="w-full h-12 rounded-xl border border-slate-350 dark:border-slate-750 text-slate-750 dark:text-slate-300 font-bold flex items-center justify-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all bg-transparent"
+            >
+              <Camera className="w-4 h-4" />
+              Retomar fotografía
+            </button>
+          </div>
+
         </div>
       </main>
-
-      {/* Bottom Actions */}
-      <footer className={`shrink-0 p-3 border-t flex flex-row gap-3 ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
-        <Link href="/capture/front" className={`py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors ${theme === 'dark' ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>
-          <X className="w-5 h-5" /> Volver a Tomar
-        </Link>
-        
-        <button 
-          onClick={handleFinalize}
-          disabled={!allValid}
-          className={`flex-1 py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${
-            allValid 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] cursor-pointer' 
-              : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
-          }`}
-        >
-          Finalizar <Check className="w-5 h-5" />
-        </button>
-      </footer>
     </div>
   );
 }
