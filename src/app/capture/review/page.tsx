@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 export default function ReviewCapture() {
   const router = useRouter();
-  const { frontImageBase64, theme, addScannedCheck, selectedClient } = useAppStore();
+  const { frontImageBase64, theme, toggleTheme, addScannedCheck, selectedClient } = useAppStore();
 
   const handleFinalize = () => {
     if (!allValid) return;
